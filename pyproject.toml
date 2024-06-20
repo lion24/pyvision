@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyvision"
+dynamic = ["version"]
+description = "Pyvision: a framework to detect objects"
+dependencies = [
+    "looseversion==1.3.0",
+    "numpy==2.0.0",
+    "opencv-python==4.10.0.84",
+    "pillow==10.3.0",
+    "pygame==2.5.2",
+    "rethinkdb==2.4.10.post1",
+    "six==1.16.0",
+    "thinker==1.1.1",
+]
+
+[project.scripts]
+#pyvision = "pyvision.entrypoint:main"
+
+[tool.hatch.envs.default.scripts]
+pyvision = "hatch run python -m pyvision.main"
+
+[tool.hatch.version]
+path = "src/pyvision/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/pyvision",
+    "EnumerateDevice/EnumerateDevice/device.cpp",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "src/pyvision",
+    "EnumerateDevice/EnumerateDevice/device.cpp",
+]
+
+[tool.hatch.metadata]
+allow-dynamic-versioning = true 
