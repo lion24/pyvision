@@ -8,7 +8,7 @@ from tkinter import ttk
 
 WIDTH = 960
 HEIGHT = 540
-FRAME_PER_SECONDS = 120
+FRAME_PER_SECONDS = 24
 
 def get_video_backends() -> dict:
     idx = 0
