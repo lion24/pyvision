@@ -30,8 +30,7 @@ def image_loop(cap, stop_event):
             pygame.display.update()
         else:
             break
-        root.update()
-        root.after(1000 // FRAME_PER_SECONDS)
+        pygame.time.wait(1000 // FRAME_PER_SECONDS)
 
 def on_camera_select(*args):
     global cap, stop_event, pygame_thread
@@ -93,12 +92,16 @@ if __name__ == "__main__":
     if camera_opt.get() != "Select camera":
         on_camera_select()
 
+    def on_closing():
+        if cap is not None:
+            cap.release()
+        if pygame_thread and pygame_thread.is_alive():
+            stop_event.set()
+            pygame_thread.join()
+        root.destroy()
+        pygame.quit()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+
     # Run the main tkinter loop
     root.mainloop()
-
-    if cap is not None:
-        cap.release()
-    if pygame_thread and pygame_thread.is_alive():
-        stop_event.set()
-        pygame_thread.join()
-    pygame.quit()
