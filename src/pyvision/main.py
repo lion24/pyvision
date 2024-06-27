@@ -6,6 +6,10 @@ import device
 import tkinter as tk
 from tkinter import ttk
 
+from pyvision.camera.opencv import OpenCVVideoStream
+from pyvision.camera import VideoStreamProvider
+from pyvision.camera.fps import FPS
+
 WIDTH = 960
 HEIGHT = 540
 FRAME_PER_SECONDS = 24
@@ -20,43 +24,51 @@ def get_video_backends() -> dict:
 
     return cameras
 
-def image_loop(cap, stop_event):
-    while not stop_event.is_set():
-        success, camera_image = cap.read()
-        if success:
-            camera_image = cv2.cvtColor(camera_image, cv2.COLOR_BGR2RGB)
+def image_loop(stream: VideoStreamProvider):
+    fps = FPS().start()
+
+    while stream.isOpened():
+        frame = stream.read()
+        if frame is not None:
+            camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             camera_surf = pygame.surfarray.make_surface(camera_image.transpose(1, 0, 2))
             screen.blit(camera_surf, (0, 0))
             pygame.display.update()
+            fps.update()
         else:
             break
         pygame.time.wait(1000 // FRAME_PER_SECONDS)
+    
+    fps.stop()
+    print(f"Elapsed time: {fps.elapsed()} seconds")
+    print(f"FPS: {fps.fps():.2f}")
 
 def on_camera_select(*args):
-    global cap, stop_event, pygame_thread
+    global cap, image_loop_thread
     idx = cameras.get(camera_opt.get())
     if idx is None:
         print("No camera selected")
         return
     if cap is not None:
-        cap.release()
-    cap = cv2.VideoCapture(idx)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT)
-    if cap.isOpened():
-        if pygame_thread and pygame_thread.is_alive():
-            stop_event.set()
-            pygame_thread.join()
-        stop_event = threading.Event()
-        pygame_thread = threading.Thread(target=image_loop, args=(cap, stop_event))
-        pygame_thread.start()
-    else:
+        print(f"stopping camera {idx}")
+        cap.stop()
+
+    cap = OpenCVVideoStream(idx, WIDTH, HEIGHT).start()
+   
+    if not cap.isOpened():
         print(f"Failed to open camera index {idx}")
+        return
+    
+    if image_loop_thread is not None and image_loop_thread.is_alive():
+        image_loop_thread.join()
+
+    image_loop_thread = threading.Thread(target=image_loop, args=(cap,))
+    image_loop_thread.start()
 
 if __name__ == "__main__":
     cap = None
     stop_event = None
-    pygame_thread = None
+    image_loop_thread = None
 
     root = tk.Tk()
     root.title("Python OpenCV ML")
@@ -94,10 +106,13 @@ if __name__ == "__main__":
 
     def on_closing():
         if cap is not None:
-            cap.release()
-        if pygame_thread and pygame_thread.is_alive():
-            stop_event.set()
-            pygame_thread.join()
+            print("cap stopping...")
+            cap.stop()
+            print("cap stopped!")
+        if image_loop_thread.is_alive():
+            print("image_loop_thread stopping...")
+            image_loop_thread.join()
+            print("image_loop_thread stopped")
         root.destroy()
         pygame.quit()
 
