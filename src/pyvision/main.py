@@ -9,11 +9,11 @@ import pygame
 import threading
 import device
 import tkinter as tk
+import time
 from tkinter import ttk
 
 from pyvision.camera.opencv import OpenCVVideoStream
 from pyvision.camera import VideoStreamProvider
-from pyvision.camera.fps import FPS
 
 WIDTH = 1280
 HEIGHT = 720
@@ -30,23 +30,15 @@ def get_video_backends() -> dict:
     return cameras
 
 def image_loop(stream: VideoStreamProvider):
-    fps = FPS().start()
+    clock = pygame.time.Clock()
 
     while stream.isOpened():
         frame = stream.read()
-        if frame is not None:
-            camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            camera_surf = pygame.surfarray.make_surface(camera_image.transpose(1, 0, 2))
-            screen.blit(camera_surf, (0, 0))
-            pygame.display.update()
-            fps.update()
-        else:
-            break
-        pygame.time.wait(1000 // FRAME_PER_SECONDS)
-    
-    fps.stop()
-    print(f"Elapsed time: {fps.elapsed()} seconds")
-    print(f"FPS: {fps.fps():.2f}")
+        camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        camera_surf = pygame.surfarray.make_surface(camera_image.transpose(1, 0, 2))
+        screen.blit(camera_surf, (0, 0))
+        pygame.display.update()
+        time.sleep(0.01) # Avoid busy looping
 
 def on_camera_select(*args):
     global cap, camera_opt, image_loop_thread
@@ -58,7 +50,7 @@ def on_camera_select(*args):
         print(f"stopping camera {idx}")
         cap.stop()
 
-    cap = OpenCVVideoStream(idx, WIDTH, HEIGHT).start()
+    cap = OpenCVVideoStream(idx, WIDTH, HEIGHT, FRAME_PER_SECONDS).start()
     if not cap.isOpened():
         print(f"Failed to open camera index {idx}")
         return
