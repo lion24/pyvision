@@ -1,7 +1,12 @@
+import os
+
+# TODO: without this, some camera like my logitech c922 take forever to initialize
+# understand why and see if there's a better fix
+os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
+
 import cv2
 import pygame
 import threading
-import os
 import device
 import tkinter as tk
 from tkinter import ttk
@@ -10,8 +15,8 @@ from pyvision.camera.opencv import OpenCVVideoStream
 from pyvision.camera import VideoStreamProvider
 from pyvision.camera.fps import FPS
 
-WIDTH = 960
-HEIGHT = 540
+WIDTH = 1280
+HEIGHT = 720
 FRAME_PER_SECONDS = 24
 
 def get_video_backends() -> dict:
@@ -54,7 +59,6 @@ def on_camera_select(*args):
         cap.stop()
 
     cap = OpenCVVideoStream(idx, WIDTH, HEIGHT).start()
-   
     if not cap.isOpened():
         print(f"Failed to open camera index {idx}")
         return

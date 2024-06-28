@@ -1,3 +1,9 @@
+import os
+
+# TODO: without this, some camera like my logitech c922 take forever to initialize
+# understand why and see if there's a better fix
+os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
+
 import cv2
 import threading
 
@@ -14,7 +20,9 @@ class OpenCVVideoStream:
         self.height = height
         self.stop_event: threading.Event = threading.Event()
         self.update_thread : threading.Thread = None
-        self.stream: VideoCapture = VideoCapture(idx)
+        #self.stream: VideoCapture = cv2.VideoCapture(idx,cv2.CAP_DSHOW,(cv2.CAP_PROP_HW_ACCELERATION, cv2.VIDEO_ACCELERATION_NONE))
+        self.stream: VideoCapture = cv2.VideoCapture(idx,cv2.CAP_MSMF)
+        self.stream.set(cv2.CAP_PROP_FPS, 60.0)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
@@ -33,7 +41,7 @@ class OpenCVVideoStream:
                 
                 end_time = self.stream.get(cv2.CAP_PROP_POS_MSEC)
                 elapsed = end_time - start_time
-                print(f"read one frame in {elapsed} miliseconds")
+                #print(f"read one frame in {elapsed} miliseconds")
 
                 if elapsed > 100:
                     print("timeout reading frame")
