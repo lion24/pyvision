@@ -1,7 +1,12 @@
+import os
+
+# TODO: without this, some camera like my logitech c922 take forever to initialize
+# understand why and see if there's a better fix
+os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
+
 import cv2
 import pygame
 import threading
-import os
 import device
 import tkinter as tk
 from tkinter import ttk
@@ -10,8 +15,8 @@ from pyvision.camera.opencv import OpenCVVideoStream
 from pyvision.camera import VideoStreamProvider
 from pyvision.camera.fps import FPS
 
-WIDTH = 960
-HEIGHT = 540
+WIDTH = 1280
+HEIGHT = 720
 FRAME_PER_SECONDS = 24
 
 def get_video_backends() -> dict:
@@ -44,7 +49,7 @@ def image_loop(stream: VideoStreamProvider):
     print(f"FPS: {fps.fps():.2f}")
 
 def on_camera_select(*args):
-    global cap, image_loop_thread
+    global cap, camera_opt, image_loop_thread
     idx = cameras.get(camera_opt.get())
     if idx is None:
         print("No camera selected")
@@ -54,7 +59,6 @@ def on_camera_select(*args):
         cap.stop()
 
     cap = OpenCVVideoStream(idx, WIDTH, HEIGHT).start()
-   
     if not cap.isOpened():
         print(f"Failed to open camera index {idx}")
         return
@@ -70,9 +74,12 @@ if __name__ == "__main__":
     stop_event = None
     image_loop_thread = None
 
+    print("OpenCV version: ", cv2.__version__)
+
     root = tk.Tk()
     root.title("Python OpenCV ML")
     root.geometry(f"{WIDTH}x{HEIGHT}")
+
 
     cameras = get_video_backends()
     if not cameras:
@@ -80,12 +87,12 @@ if __name__ == "__main__":
         exit(1)
 
     camera_opt = tk.StringVar(root)
-    camera_opt.set(next(iter(cameras.keys()), "Select camera"))
+    camera_opt.set("Select camera")
 
     top_frame = tk.Frame(root)
     top_frame.pack(side=tk.TOP, fill=tk.X)
 
-    camera_menu = ttk.OptionMenu(top_frame, camera_opt, *cameras.keys())
+    camera_menu = ttk.OptionMenu(top_frame, camera_opt, "Select camera", *cameras.keys())
     camera_menu.pack()
 
     pygame_frame = tk.Frame(root, width=WIDTH, height=HEIGHT)
@@ -101,8 +108,8 @@ if __name__ == "__main__":
     camera_opt.trace_add('write', on_camera_select)
 
     # Manually trigger the first selection if a camera is available
-    if camera_opt.get() != "Select camera":
-        on_camera_select()
+    if next(iter(cameras.keys()), "Select camera") != "Select camera":
+        camera_opt.set(next(iter(cameras.keys())))
 
     def on_closing():
         if cap is not None:
