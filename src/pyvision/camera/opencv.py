@@ -20,14 +20,17 @@ class OpenCVVideoStream:
         self.idx = idx
         self.width = width
         self.height = height
-        self.desired_fps = desired_fps
         self.stop_event: threading.Event = threading.Event()
         self.update_thread : threading.Thread = None
         #self.stream: VideoCapture = cv2.VideoCapture(idx,cv2.CAP_DSHOW,(cv2.CAP_PROP_HW_ACCELERATION, cv2.VIDEO_ACCELERATION_NONE))
         self.stream: VideoCapture = cv2.VideoCapture(idx,cv2.CAP_MSMF)
-        print("backend FPS: ", self.stream.get(cv2.CAP_PROP_FPS))
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
+        max_supported_fps = self.stream.get(cv2.CAP_PROP_FPS)
+        if desired_fps > max_supported_fps:
+            print(f"You request more FPS that the backend actually support, falling back to {max_supported_fps}")
+        self.desired_fps = min(desired_fps, self.stream.get(cv2.CAP_PROP_FPS))
 
         # Read and store the first frame
         (success, self.frame) = self.stream.read()
@@ -39,7 +42,6 @@ class OpenCVVideoStream:
 
         while not self.stop_event.is_set():
             if self.stream is not None and self.stream.isOpened():
-                start_time = self.stream.get(cv2.CAP_PROP_POS_MSEC)
                 ret, frame = self.stream.read()
                 if not ret:
                     print("failed to read one frame")
