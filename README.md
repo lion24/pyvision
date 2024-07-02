@@ -23,4 +23,4 @@ for each of the devices.
 
 This library is automatically built and shipped when running the project.
 It requires the Windows SDK and Python native code extension enabled.
-Those can be obtained from the Visual Studio Community installer (not visual studio code)
+Those can be obtained from the [Visual Studio Community installer](https://visualstudio.microsoft.com/vs/community/) (not visual studio code)
