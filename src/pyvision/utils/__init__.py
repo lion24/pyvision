@@ -1,5 +1,6 @@
 import device
 
+
 def get_video_backends() -> dict:
     idx = 0
     cameras = {}

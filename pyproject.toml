@@ -11,6 +11,9 @@ dependencies = [
     "numpy==2.0.0",
     "opencv-python==4.10.0.84",
     "pillow==10.3.0",
+    "pre-commit==3.7.1",
+    "pylama==8.4.1",
+    "pylint==3.2.5",
     "pygame==2.5.2",
     "rethinkdb==2.4.10.post1",
     "six==1.16.0",
@@ -39,4 +42,4 @@ include = [
 ]
 
 [tool.hatch.metadata]
-allow-dynamic-versioning = true 
+allow-dynamic-versioning = true

@@ -4,14 +4,13 @@ import os
 # understand why and see if there's a better fix
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 
-import cv2
 import threading
-import time
+
+import cv2
+from cv2 import VideoCapture
 
 from pyvision.camera import VideoStreamProvider
 from pyvision.camera.fps import FPS
-from cv2 import VideoCapture
-
 
 
 @VideoStreamProvider.register
@@ -21,15 +20,16 @@ class OpenCVVideoStream:
         self.width = width
         self.height = height
         self.stop_event: threading.Event = threading.Event()
-        self.update_thread : threading.Thread = None
-        #self.stream: VideoCapture = cv2.VideoCapture(idx,cv2.CAP_DSHOW,(cv2.CAP_PROP_HW_ACCELERATION, cv2.VIDEO_ACCELERATION_NONE))
-        self.stream: VideoCapture = cv2.VideoCapture(idx,cv2.CAP_MSMF)
+        self.update_thread: threading.Thread = None
+        self.stream: VideoCapture = cv2.VideoCapture(idx, cv2.CAP_MSMF)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
         max_supported_fps = self.stream.get(cv2.CAP_PROP_FPS)
         if desired_fps > max_supported_fps:
-            print(f"You request more FPS that the backend actually support, falling back to {max_supported_fps}")
+            print(
+                f"You request more FPS that the backend actually support. falling back to {max_supported_fps}"  # noqa
+            )
         self.desired_fps = min(desired_fps, self.stream.get(cv2.CAP_PROP_FPS))
 
         # Read and store the first frame
@@ -47,7 +47,15 @@ class OpenCVVideoStream:
                     print("failed to read one frame")
 
                 fps.update(True)
-                cv2.putText(frame, "{:.0f} frame/s".format(fps.get_fps()), (self.width - 180, self.height - 40), cv2.FONT_HERSHEY_TRIPLEX, 1.0, (0, 255, 0), 1)
+                cv2.putText(
+                    frame,
+                    "{:.0f} frame/s".format(fps.get_fps()),
+                    (self.width - 180, self.height - 40),
+                    cv2.FONT_HERSHEY_TRIPLEX,
+                    1.0,
+                    (0, 255, 0),
+                    1,
+                )
                 self.frame = frame
 
     def start(self):
@@ -57,10 +65,10 @@ class OpenCVVideoStream:
         self.update_thread = threading.Thread(target=self.update)
         self.update_thread.start()
         return self
-        
+
     def read(self):
         return self.frame
-    
+
     def stop(self):
         if self.update_thread is not None and self.update_thread.is_alive():
             self.stop_event.set()

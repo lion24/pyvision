@@ -1,7 +1,8 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import List
+
 import weakref
+from abc import ABC, abstractmethod
+
 
 class Subject(ABC):
     @abstractmethod
@@ -15,6 +16,7 @@ class Subject(ABC):
     @abstractmethod
     def notify(self) -> None:
         pass
+
 
 class ConcreteSubject(Subject):
     def __init__(self):
@@ -31,6 +33,7 @@ class ConcreteSubject(Subject):
     def notify(self) -> None:
         for observer in list(self._observers):
             observer.update(self)
+
 
 class Observer(ABC):
     @abstractmethod

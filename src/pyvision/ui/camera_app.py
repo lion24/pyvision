@@ -4,16 +4,17 @@ import os
 # understand why and see if there's a better fix
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 
-import cv2
-import pygame
 import tkinter as tk
 from tkinter import ttk
 
-import pyvision.utils as utils
+import cv2
+import pygame
 
-from pyvision.ui.pygame_frame import PygameFrame
+import pyvision.utils as utils
 from pyvision.camera.opencv import OpenCVVideoStream
+from pyvision.ui.pygame_frame import PygameFrame
 from pyvision.utils.observer import Observer
+
 
 class CameraApp(tk.Tk, Observer):
     def __init__(self, width, height, frame_rate):
@@ -32,17 +33,17 @@ class CameraApp(tk.Tk, Observer):
             exit(1)
 
         self.init_ui()
-        #self.camera_opt.set(next(iter(self.cameras.keys()), "Select camera"))
+        # self.camera_opt.set(next(iter(self.cameras.keys()), "Select camera"))
 
         # Attach an observer to receive updates and update the display
         self.pygame_frame.attach(self)
 
-        self.camera_opt.trace_add('write', self.on_camera_select)
+        self.camera_opt.trace_add("write", self.on_camera_select)
 
         # Manually trigger the first selection if a camera is available
         if next(iter(self.cameras.keys()), "Select camera") != "Select camera":
             self.camera_opt.set(next(iter(self.cameras.keys())))
-        
+
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def init_ui(self):
@@ -52,10 +53,14 @@ class CameraApp(tk.Tk, Observer):
         self.camera_opt = tk.StringVar(self)
         self.camera_opt.set("Select camera")
 
-        self.camera_menu = ttk.OptionMenu(self.top_frame, self.camera_opt, "Select camera", *self.cameras.keys())
+        self.camera_menu = ttk.OptionMenu(
+            self.top_frame, self.camera_opt, "Select camera", *self.cameras.keys()
+        )
         self.camera_menu.pack()
 
-        self.pygame_frame = PygameFrame(self, width=self.width, height=self.height, fps=self.frame_rate)
+        self.pygame_frame = PygameFrame(
+            self, width=self.width, height=self.height, fps=self.frame_rate
+        )
         self.pygame_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
     def on_camera_select(self, *args):

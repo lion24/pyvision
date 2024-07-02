@@ -12,6 +12,7 @@ FRAME_PER_SECONDS = 32
 
 if __name__ == "__main__":
     print("OpenCV version: ", cv2.__version__)
+    print(cv2.getBuildInformation())
 
     app = CameraApp(1280, 720, FRAME_PER_SECONDS)
     app.mainloop()
