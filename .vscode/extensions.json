@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+      // Python support
+      "ms-python.vscode-pylance",
+      "ms-python.python",
+      // Ruff checker and formatter
+      "charliermarsh.ruff",
+    ]
+  }
