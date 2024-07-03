@@ -1,8 +1,4 @@
-import os
-
-# TODO: without this, some camera like my logitech c922 take forever to initialize
-# understand why and see if there's a better fix
-os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
+"""Module containing the OpenCVVideoStream class."""
 
 import threading
 
@@ -15,7 +11,18 @@ from pyvision.camera.fps import FPS
 
 @VideoStreamProvider.register
 class OpenCVVideoStream:
+    """Class representing a video stream using OpenCV."""
+
     def __init__(self, idx=0, width=960, height=540, desired_fps=24):
+        """Initialize the OpenCVVideoStream object.
+
+        Args:
+            idx (int): Index of the video capture device.
+            width (int): Width of the video frame.
+            height (int): Height of the video frame.
+            desired_fps (int): Desired frames per second.
+
+        """
         self.idx = idx
         self.width = width
         self.height = height
@@ -38,6 +45,11 @@ class OpenCVVideoStream:
             print("init failed to read from stream")
 
     def update(self):
+        """Update the video stream frames.
+
+        This method continuously reads frames from the video stream and updates the frame attribute.
+
+        """
         fps = FPS(self.desired_fps)
 
         while not self.stop_event.is_set():
@@ -59,6 +71,12 @@ class OpenCVVideoStream:
                 self.frame = frame
 
     def start(self):
+        """Start the video stream.
+
+        Returns:
+            OpenCVVideoStream: The current instance of the OpenCVVideoStream object.
+
+        """
         if self.stop_event.is_set():
             self.stop_event.clear()
 
@@ -67,9 +85,16 @@ class OpenCVVideoStream:
         return self
 
     def read(self):
+        """Read the current frame from the video stream.
+
+        Returns:
+            numpy.ndarray: The current frame of the video stream.
+
+        """
         return self.frame
 
     def stop(self):
+        """Stop the video stream."""
         if self.update_thread is not None and self.update_thread.is_alive():
             self.stop_event.set()
             print("waiting update_thread to join")
@@ -81,4 +106,10 @@ class OpenCVVideoStream:
             self.stream = None
 
     def isOpened(self) -> bool:
+        """Check if the video stream is opened.
+
+        Returns:
+            bool: True if the video stream is opened, False otherwise.
+
+        """
         return self.stream.isOpened() if self.stream else None

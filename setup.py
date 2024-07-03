@@ -1,3 +1,5 @@
+"""Setup script for the package."""
+
 import pathlib
 
 import pkg_resources

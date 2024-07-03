@@ -1,3 +1,5 @@
+"""Main entry point for the application."""
+
 import os
 
 # TODO: without this, some camera like my logitech c922 takes forever to initialize
