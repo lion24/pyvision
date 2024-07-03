@@ -8,5 +8,45 @@
             "source.organizeImports": "explicit"
         },
         "editor.defaultFormatter": "charliermarsh.ruff",
-    }
+    },
+    "editor.inlayHints.enabled": "off",
+    "editor.guides.indentation": false, // new API for indent guides. The old one is: "editor.renderIndentGuides": false,
+    "editor.guides.bracketPairs": false, // advanced indent guides (But only for brackets) (This does not turn off editor.bracketPairColorization)
+    "editor.wordWrap": "off",
+    "diffEditor.wordWrap": "off",
+
+    "workbench.colorCustomizations": {
+        // ...
+        "editor.lineHighlightBorder": "#9fced11f",
+        "editor.lineHighlightBackground": "#1073cf2d",
+    },
+    "blockman.n05CustomColorOfDepth0": "none",
+    "blockman.n10CustomColorOfDepth5": "none",
+    "blockman.n09CustomColorOfDepth4": "none",
+    "blockman.n07CustomColorOfDepth2": "none",
+    "blockman.n08CustomColorOfDepth3": "none",
+    "blockman.n06CustomColorOfDepth1": "none",
+    "blockman.n12CustomColorOfDepth7": "none",
+    "blockman.n13CustomColorOfDepth8": "none",
+    "blockman.n11CustomColorOfDepth6": "none",
+    "blockman.n14CustomColorOfDepth9": "none",
+    "blockman.n15CustomColorOfDepth10": "none",
+    "blockman.n17CustomColorOfFocusedBlock": "same",
+    "blockman.n20CustomColorOfDepth0Border": "none",
+    "blockman.n22AnalyzeCurlyBrackets": false,
+    "blockman.n25AnalyzeTags": false,
+    "blockman.n33A01B1FromDepth0ToInwardForAllBorders": "10,0,0,1; empty",
+    "blockman.n33A01B2FromDepth0ToInwardForAllBackgrounds": "10,0,0,1; empty",
+
+    "blockman.n33A02B1FromFocusToOutwardForAllBorders": "!",
+    "blockman.n33A02B2FromFocusToOutwardForAllBackgrounds": "!",
+
+    "blockman.n33A03B1FromDepth0ToInwardForFocusTreeBorders": "!",
+    "blockman.n33A03B2FromDepth0ToInwardForFocusTreeBackgrounds": "!",
+
+    "blockman.n33A04B1FromFocusToOutwardForFocusTreeBorders": "!",
+    "blockman.n33A04B2FromFocusToOutwardForFocusTreeBackgrounds": "!",
+
+    "blockman.n33A05B1FromFocusToInwardForAllBorders": "50,0,0,0; basic",
+    "blockman.n33A05B2FromFocusToInwardForAllBackgrounds": "50,0,0,0; basic"
 }

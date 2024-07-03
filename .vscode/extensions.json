@@ -5,5 +5,7 @@
       "ms-python.python",
       // Ruff checker and formatter
       "charliermarsh.ruff",
+      // Blockman
+      "leodevbro.blockman",
     ]
   }
