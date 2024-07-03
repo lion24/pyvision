@@ -24,14 +24,12 @@ repos:
         minimum_pre_commit_version: 2.9.2
         require_serial: true
         types_or: [python, pyi]
--   repo: https://github.com/klen/pylama.git
-    rev: 8.4.1
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.5.0
     hooks:
-    -   id: pylama
-        name: pylama
-        description: This hook runs pylama.
-        entry: pylama
-        language: python
-        types: [file, python]
-        args: []
-        additional_dependencies: []
+    # Run the linter.
+    -   id: ruff
+        args: [ --fix ]
+    # Run the formatter.
+    -   id: ruff-format

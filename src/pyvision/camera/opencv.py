@@ -28,7 +28,7 @@ class OpenCVVideoStream:
         max_supported_fps = self.stream.get(cv2.CAP_PROP_FPS)
         if desired_fps > max_supported_fps:
             print(
-                f"You request more FPS that the backend actually support. falling back to {max_supported_fps}"  # noqa
+                f"You request more FPS that the backend actually support. falling back to {max_supported_fps}"
             )
         self.desired_fps = min(desired_fps, self.stream.get(cv2.CAP_PROP_FPS))
 
