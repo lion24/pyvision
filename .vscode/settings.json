@@ -32,6 +32,7 @@
     "blockman.n14CustomColorOfDepth9": "none",
     "blockman.n15CustomColorOfDepth10": "none",
     "blockman.n17CustomColorOfFocusedBlock": "same",
+    "blockman.n18CustomColorOfFocusedBlockBorder": "#3e3e42",
     "blockman.n20CustomColorOfDepth0Border": "none",
     "blockman.n22AnalyzeCurlyBrackets": false,
     "blockman.n25AnalyzeTags": false,
