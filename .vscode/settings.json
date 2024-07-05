@@ -9,6 +9,7 @@
         },
         "editor.defaultFormatter": "charliermarsh.ruff",
     },
+    "ruff.nativeServer": true,
     "editor.inlayHints.enabled": "off",
     "editor.guides.indentation": false, // new API for indent guides. The old one is: "editor.renderIndentGuides": false,
     "editor.guides.bracketPairs": false, // advanced indent guides (But only for brackets) (This does not turn off editor.bracketPairColorization)
