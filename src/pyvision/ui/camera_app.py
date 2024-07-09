@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from typing import Any
 
 import cv2
 import pygame
@@ -9,7 +10,7 @@ import pygame
 import pyvision.utils as utils
 from pyvision.camera.opencv import OpenCVVideoStream
 from pyvision.ui.pygame_frame import PygameFrame
-from pyvision.utils.observer import Observer
+from pyvision.utils.observer import Observer, Subject
 
 
 class CameraApp(tk.Tk, Observer):
@@ -19,12 +20,12 @@ class CameraApp(tk.Tk, Observer):
         width (int): The width of the camera feed window.
         height (int): The height of the camera feed window.
         frame_rate (int): The frame rate of the camera feed.
-        cap (OpenCVVideoStream): The OpenCVVideoStream object representing the camera feed.
+        cap (VideoStreamProvider | None): The VideoStreamProvider object representing the camera feed.
         cameras (dict): A dictionary of available cameras.
 
     """
 
-    def __init__(self, width, height, frame_rate):
+    def __init__(self, width: int, height: int, frame_rate: int) -> None:
         """Initialize the CameraApp object.
 
         Args:
@@ -51,7 +52,7 @@ class CameraApp(tk.Tk, Observer):
             self.camera_opt.set(next(iter(self.cameras.keys())))
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         """Initialize the user interface of the camera app."""
         self.top_frame = tk.Frame(self)
         self.top_frame.pack(side=tk.TOP, fill=tk.X)
@@ -66,14 +67,14 @@ class CameraApp(tk.Tk, Observer):
         )
         self.pygame_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-    def on_camera_select(self, *args):
+    def on_camera_select(self, *args: Any) -> None:
         """Callback function called when a camera is selected from the dropdown menu."""
         idx = self.cameras.get(self.camera_opt.get())
         if idx is None:
             print("No camera selected")
             return
         if self.cap is not None:
-            print(f"stopping camera {idx}")
+            print(f"Stopping camera {self.cap}")
             self.cap.stop()
         cap = OpenCVVideoStream(idx, self.width, self.height, self.frame_rate).start()
         if not cap.isOpened():
@@ -81,7 +82,7 @@ class CameraApp(tk.Tk, Observer):
             return
         self.cap = cap
 
-    def on_closing(self):
+    def on_closing(self) -> None:
         """Callback function called when the camera app window is closed."""
         if self.cap is not None:
             print("cap stopping...")
@@ -91,17 +92,20 @@ class CameraApp(tk.Tk, Observer):
         self.destroy()
         pygame.quit()
 
-    def update(self, subject):
-        """Called everytime an update from the pygame frame is requested.
+    def notify_update(self, subject: Subject) -> None:
+        """Called every time an update from the pygame frame is requested.
 
-        This call will have the effect to refresh the image displayed.
+        This call will have the effect of refreshing the image displayed.
 
         Args:
             subject (PygameFrame): The subject that triggered the update.
 
         """
-        if self.cap.isOpened():
+        if self.cap is not None and self.cap.isOpened():
             frame = self.cap.read()
             camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            camera_surf = pygame.surfarray.make_surface(camera_image.transpose(1, 0, 2))
+            camera_surf: pygame.Surface = pygame.surfarray.make_surface(  # type: ignore
+                camera_image.transpose(1, 0, 2)
+            )
             self.pygame_frame.screen.blit(camera_surf, (0, 0))
+            pygame.display.update()

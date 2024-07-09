@@ -2,6 +2,7 @@
 
 import os
 import tkinter as tk
+from typing import Any, Optional
 
 import pygame
 
@@ -19,7 +20,14 @@ class PygameFrame(tk.Frame, ConcreteSubject):
         **kwargs: Additional keyword arguments to pass to the tkinter Frame constructor.
     """
 
-    def __init__(self, master=None, width=1280, height=720, fps=30, **kwargs):
+    def __init__(
+        self,
+        master: Optional[tk.Tk] = None,
+        width: int = 1280,
+        height: int = 720,
+        fps: int = 30,
+        **kwargs: Any,
+    ) -> None:
         """Initializes the PygameFrame.
 
         Args:

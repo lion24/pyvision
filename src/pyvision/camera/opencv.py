@@ -13,7 +13,9 @@ from pyvision.camera.fps import FPS
 class OpenCVVideoStream:
     """Class representing a video stream using OpenCV."""
 
-    def __init__(self, idx=0, width=960, height=540, desired_fps=24):
+    def __init__(
+        self, idx: int = 0, width: int = 960, height: int = 540, desired_fps: int = 24
+    ) -> None:
         """Initialize the OpenCVVideoStream object.
 
         Args:
@@ -27,8 +29,8 @@ class OpenCVVideoStream:
         self.width = width
         self.height = height
         self.stop_event: threading.Event = threading.Event()
-        self.update_thread: threading.Thread = None
-        self.stream: VideoCapture = cv2.VideoCapture(idx, cv2.CAP_MSMF)
+        self.update_thread: threading.Thread = threading.Thread(target=self.update)
+        self.stream: None | VideoCapture = cv2.VideoCapture(idx, cv2.CAP_MSMF)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
@@ -37,7 +39,7 @@ class OpenCVVideoStream:
             print(
                 f"You request more FPS that the backend actually support. falling back to {max_supported_fps}"
             )
-        self.desired_fps = min(desired_fps, self.stream.get(cv2.CAP_PROP_FPS))
+        self.desired_fps = min(desired_fps, int(max_supported_fps))
 
         # Read and store the first frame
         (success, self.frame) = self.stream.read()
@@ -80,7 +82,6 @@ class OpenCVVideoStream:
         if self.stop_event.is_set():
             self.stop_event.clear()
 
-        self.update_thread = threading.Thread(target=self.update)
         self.update_thread.start()
         return self
 
@@ -95,13 +96,13 @@ class OpenCVVideoStream:
 
     def stop(self):
         """Stop the video stream."""
-        if self.update_thread is not None and self.update_thread.is_alive():
+        if self.update_thread and self.update_thread.is_alive():
             self.stop_event.set()
             print("waiting update_thread to join")
             self.update_thread.join()
             print("update_thread joined!")
 
-        if self.stream is not None:
+        if self.stream:
             self.stream.release()
             self.stream = None
 
@@ -112,4 +113,4 @@ class OpenCVVideoStream:
             bool: True if the video stream is opened, False otherwise.
 
         """
-        return self.stream.isOpened() if self.stream else None
+        return self.stream.isOpened() if self.stream else False

@@ -38,7 +38,7 @@ class ConcreteSubject(Subject):
 
     def __init__(self):
         """Initialize the ConcreteSubject object."""
-        self._observers = weakref.WeakSet()
+        self._observers: weakref.WeakSet[Observer] = weakref.WeakSet()
 
     def attach(self, observer: Observer) -> None:
         """Attach an observer to the subject.
@@ -61,14 +61,14 @@ class ConcreteSubject(Subject):
     def notify(self) -> None:
         """Notify all attached observers."""
         for observer in list(self._observers):
-            observer.update(self)
+            observer.notify_update(self)
 
 
 class Observer(ABC):
     """Abstract base class for observers."""
 
     @abstractmethod
-    def update(self, subject: Subject) -> None:
+    def notify_update(self, subject: Subject) -> None:
         """Update the observer with the latest state of the subject.
 
         Args:
