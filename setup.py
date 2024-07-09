@@ -3,7 +3,7 @@
 import pathlib
 
 import pkg_resources
-from setuptools import Extension, find_packages, setup
+from setuptools import Extension, setup
 
 setup_dir = pathlib.Path(__file__).parent.resolve()
 
@@ -19,11 +19,9 @@ setup_args = dict(
     ext_modules=[
         Extension(
             "device",
-            sources=["EnumerateDevice/EnumerateDevice/device.cpp"],
+            sources=["./src/pyvision/device/device.cpp"],
         )
     ],
-    packages=find_packages("src"),
-    package_dir={"": "src"},
 )
 
-setup(**setup_args)
+setup(**setup_args)  # type: ignore
