@@ -18,8 +18,8 @@ setup_args = dict(
     install_requires=install_requires,
     ext_modules=[
         Extension(
-            "device",
-            sources=["./src/pyvision/device/device.cpp"],
+            "pyvision.device",
+            sources=["./src/pyvision/device_ext/device.cpp"],
         )
     ],
 )
