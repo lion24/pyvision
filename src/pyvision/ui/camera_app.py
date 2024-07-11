@@ -2,12 +2,11 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Any
+from typing import Any, Tuple
 
 import cv2
 import pygame
 
-import pyvision.utils as utils
 from pyvision.camera.opencv import OpenCVVideoStream
 from pyvision.ui.pygame_frame import PygameFrame
 from pyvision.utils.observer import Observer, Subject
@@ -25,13 +24,16 @@ class CameraApp(tk.Tk, Observer):
 
     """
 
-    def __init__(self, width: int, height: int, frame_rate: int) -> None:
+    def __init__(
+        self, width: int, height: int, frame_rate: int, cameras: dict[str, int]
+    ) -> None:
         """Initialize the CameraApp object.
 
         Args:
             width (int): The width of the camera feed window.
             height (int): The height of the camera feed window.
             frame_rate (int): The frame rate of the camera feed.
+            cameras (dict[str, int]): A dictionary of available cameras.
 
         """
         super().__init__()
@@ -41,36 +43,36 @@ class CameraApp(tk.Tk, Observer):
         self.height = height
         self.frame_rate = frame_rate
         self.cap = None
-        self.cameras = utils.get_video_backends()
-        if not self.cameras:
-            print("No cameras found")
-            exit(1)
+        self.cameras = cameras
+        self.camera_menu = None
         self.init_ui()
-        self.pygame_frame.attach(self)
-        self.camera_opt.trace_add("write", self.on_camera_select)
-        if next(iter(self.cameras.keys()), "Select camera") != "Select camera":
-            self.camera_opt.set(next(iter(self.cameras.keys())))
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def init_ui(self) -> None:
         """Initialize the user interface of the camera app."""
-        self.top_frame = tk.Frame(self)
-        self.top_frame.pack(side=tk.TOP, fill=tk.X)
-        self.camera_opt = tk.StringVar(self)
-        self.camera_opt.set("Select camera")
-        self.camera_menu = ttk.OptionMenu(
-            self.top_frame, self.camera_opt, "Select camera", *self.cameras.keys()
-        )
-        self.camera_menu.pack()
+        self.camera_menu = CameraSelectionFrame(self, self.cameras)
         self.pygame_frame = PygameFrame(
             self, width=self.width, height=self.height, fps=self.frame_rate
         )
         self.pygame_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        self.pygame_frame.attach(self)
+
+        initial_camera = next(iter(self.cameras.keys()), None)
+        if initial_camera:
+            self.camera_menu.camera_opt.set(initial_camera)
 
     def on_camera_select(self, *args: Any) -> None:
-        """Callback function called when a camera is selected from the dropdown menu."""
-        idx = self.cameras.get(self.camera_opt.get())
-        if idx is None:
+        """Callback function called when a camera is selected from the dropdown menu.
+
+        Args:
+            *args (Any): Additional arguments.
+
+        """
+        if self.camera_menu is None:
+            return
+
+        idx = self.camera_menu.get_selected_camera()
+        if idx == -1:
             print("No camera selected")
             return
         if self.cap is not None:
@@ -92,15 +94,23 @@ class CameraApp(tk.Tk, Observer):
         self.destroy()
         pygame.quit()
 
-    def notify_update(self, subject: Subject) -> None:
+    def notify_update(
+        self, subject: Subject, *args: Tuple[Any], **kwargs: dict[str, Any]
+    ) -> None:
         """Called every time an update from the pygame frame is requested.
 
         This call will have the effect of refreshing the image displayed.
 
         Args:
             subject (PygameFrame): The subject that triggered the update.
+            *args (Tuple[Any]): Additional arguments.
+            **kwargs (dict[str, Any]): Additional keyword arguments.
 
         """
+        if isinstance(subject, CameraSelectionFrame):
+            print("Camera selected")
+            self.on_camera_select(*args)
+
         if self.cap is not None and self.cap.isOpened():
             frame = self.cap.read()
             camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -109,3 +119,45 @@ class CameraApp(tk.Tk, Observer):
             )
             self.pygame_frame.screen.blit(camera_surf, (0, 0))
             pygame.display.update()
+
+
+class CameraSelectionFrame(tk.Frame):
+    """A class representing the camera selection frame in the camera app.
+
+    Attributes:
+        cameras (dict): A dictionary of available cameras.
+
+    """
+
+    def __init__(self, parent: CameraApp, cameras: dict[str, int]):
+        """Initialize the CameraSelectionFrame object.
+
+        Args:
+            parent (CameraApp): The parent camera app.
+            cameras (dict[str, int]): A dictionary of available cameras.
+
+        """
+        super().__init__(parent)
+
+        self.cameras = cameras
+
+        self.pack(side=tk.TOP, fill=tk.X)
+        self.camera_opt = tk.StringVar(self)
+        self.camera_opt.set("Select camera")
+        self.menu = ttk.OptionMenu(
+            self, self.camera_opt, "Select camera", *self.cameras.keys()
+        )
+        self.menu.pack()
+
+        self.camera_opt.trace_add("write", parent.on_camera_select)
+        if next(iter(self.cameras.keys()), "Select camera") != "Select camera":
+            self.camera_opt.set(next(iter(self.cameras.keys())))
+
+    def get_selected_camera(self) -> int:
+        """Get the selected camera index.
+
+        Returns:
+            int: The selected camera index.
+
+        """
+        return self.cameras.get(self.camera_opt.get(), -1)
