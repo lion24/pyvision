@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import weakref
 from abc import ABC, abstractmethod
+from typing import Any, Tuple
 
 
 class Subject(ABC):
@@ -28,7 +29,7 @@ class Subject(ABC):
         pass
 
     @abstractmethod
-    def notify(self) -> None:
+    def notify(self, *args: Tuple[Any], **kwargs: dict[str, Any]) -> None:
         """Notify all attached observers."""
         pass
 
@@ -58,20 +59,24 @@ class ConcreteSubject(Subject):
         print("Subject: Detached an observer.")
         self._observers.discard(observer)
 
-    def notify(self) -> None:
+    def notify(self, *args: Tuple[Any], **kwargs: dict[str, Any]) -> None:
         """Notify all attached observers."""
         for observer in list(self._observers):
-            observer.notify_update(self)
+            observer.notify_update(self, *args, **kwargs)
 
 
 class Observer(ABC):
     """Abstract base class for observers."""
 
     @abstractmethod
-    def notify_update(self, subject: Subject) -> None:
+    def notify_update(
+        self, subject: Subject, *args: Tuple[Any], **kwargs: dict[str, Any]
+    ) -> None:
         """Update the observer with the latest state of the subject.
 
         Args:
             subject (Subject): The subject being observed.
+            *args (Tuple[Any]): Additional arguments.
+            **kwargs (dict[str, Any]): Additional keyword arguments.
         """
         pass
