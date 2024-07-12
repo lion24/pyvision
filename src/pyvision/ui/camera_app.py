@@ -8,6 +8,11 @@ import cv2
 import pygame
 
 from pyvision.camera.opencv import OpenCVVideoStream
+from pyvision.models import ImageProcessingStrategy
+from pyvision.models.filters import (
+    EdgeDetectionKernelFilter,
+    NoOpFilter,
+)
 from pyvision.ui.pygame_frame import PygameFrame
 from pyvision.utils.observer import Observer, Subject
 
@@ -47,6 +52,11 @@ class CameraApp(tk.Tk, Observer):
         self.camera_menu = None
         self.init_ui()
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        # set default processing strategy
+        self.processing_strategy: ImageProcessingStrategy = EdgeDetectionKernelFilter(
+            NoOpFilter()
+        )
 
     def init_ui(self) -> None:
         """Initialize the user interface of the camera app."""
@@ -113,7 +123,8 @@ class CameraApp(tk.Tk, Observer):
 
         if self.cap is not None and self.cap.isOpened():
             frame = self.cap.read()
-            camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            processed_frame = self.processing_strategy.process(frame)
+            camera_image = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             camera_surf: pygame.Surface = pygame.surfarray.make_surface(  # type: ignore
                 camera_image.transpose(1, 0, 2)
             )
