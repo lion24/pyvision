@@ -6,4 +6,4 @@ Attributes:
     __version__ (str): Indicates the current version of the pyvision framework.
 """
 
-__version__ = "0.0.0"
+__version__ = "0.0.1"
