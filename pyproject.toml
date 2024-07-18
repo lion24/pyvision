@@ -14,7 +14,7 @@ dependencies = [
     "pylint==3.2.5",
     "pygame==2.6.0",
     "rethinkdb==2.4.10.post1",
-    "ruff==0.5.2",
+    "ruff==0.5.3",
     "six==1.16.0",
     "thinker==1.1.1",
 ]
