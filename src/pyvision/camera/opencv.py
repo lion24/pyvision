@@ -1,6 +1,7 @@
 """Module containing the OpenCVVideoStream class."""
 
 import threading
+from typing import Any
 
 import cv2
 from cv2 import VideoCapture
@@ -33,21 +34,23 @@ class OpenCVVideoStream:
         self.stream: None | VideoCapture = cv2.VideoCapture(idx, cv2.CAP_MSMF)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        print("aperture: ", cv2.CAP_PROP_EXPOSURE)
-        # self.stream.set(cv2.CAP_PROP_EXPOSURE, -6)
-        print("aperture: ", cv2.CAP_PROP_EXPOSURE)
+        print("current exposure: ", self.stream.get(cv2.CAP_PROP_EXPOSURE))
+        self.stream.set(cv2.CAP_PROP_EXPOSURE, 0)
 
         max_supported_fps = self.stream.get(cv2.CAP_PROP_FPS)
         if desired_fps > max_supported_fps:
             print(
                 f"You request more FPS that the backend actually support. falling back to {max_supported_fps}"
             )
-        self.desired_fps = min(desired_fps, int(max_supported_fps))
+        desired_fps = min(desired_fps, int(max_supported_fps))
+        self.fps = FPS(desired_fps)
 
         # Read and store the first frame
-        (success, self.frame) = self.stream.read()
+        success, frame = self.stream.read()
         if not success:
             print("init failed to read from stream")
+
+        self.frame = frame
 
     def update(self):
         """Update the video stream frames.
@@ -55,24 +58,13 @@ class OpenCVVideoStream:
         This method continuously reads frames from the video stream and updates the frame attribute.
 
         """
-        fps = FPS(self.desired_fps)
-
         while not self.stop_event.is_set():
             if self.stream is not None and self.stream.isOpened():
                 ret, frame = self.stream.read()
                 if not ret:
                     print("failed to read one frame")
 
-                fps.update(True)
-                cv2.putText(
-                    frame,
-                    "{:.0f} frame/s".format(fps.get_fps()),
-                    (self.width - 180, self.height - 40),
-                    cv2.FONT_HERSHEY_TRIPLEX,
-                    1.0,
-                    (0, 255, 0),
-                    1,
-                )
+                self.fps.update(True)
                 self.frame = frame
 
     def start(self):
@@ -108,6 +100,20 @@ class OpenCVVideoStream:
         if self.stream:
             self.stream.release()
             self.stream = None
+
+    def info(self) -> dict[str, Any]:
+        """Return the information about the video stream.
+
+        Returns:
+            dict[str, int]: The information about the video stream.
+
+        """
+        return {
+            "width": self.width,
+            "height": self.height,
+            "fps": self.fps.get_fps(),
+            "idx": self.idx,
+        }
 
     def isOpened(self) -> bool:
         """Check if the video stream is opened.

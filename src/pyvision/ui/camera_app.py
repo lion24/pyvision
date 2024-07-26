@@ -11,7 +11,7 @@ from cv2.typing import MatLike
 from pyvision.camera.opencv import OpenCVVideoStream
 from pyvision.models import ImageProcessingStrategy
 from pyvision.models.filters import (
-    IdentityFilter,
+    EdgeDetectionKernelFilter,
     NoOpFilter,
 )
 from pyvision.ui.pygame_frame import PygameFrame
@@ -59,7 +59,9 @@ class CameraApp(tk.Tk, Observer):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # set default processing strategy
-        self.processing_strategy: ImageProcessingStrategy = IdentityFilter(NoOpFilter())
+        self.processing_strategy: ImageProcessingStrategy = EdgeDetectionKernelFilter(
+            NoOpFilter()
+        )
 
     def init_ui(self) -> None:
         """Initialize the user interface of the camera app."""
@@ -138,8 +140,18 @@ class CameraApp(tk.Tk, Observer):
                 frame, self.brightness, self.contrast
             )
             processed_frame = self.processing_strategy.process(frame)
+            cv2.putText(
+                processed_frame,
+                "{:.0f} frame/s".format(self.cap.info()["fps"]),
+                (self.width - 180, self.height - 40),
+                cv2.FONT_HERSHEY_TRIPLEX,
+                1.0,
+                (0, 255, 0),
+                1,
+            )
+            processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             camera_surf: pygame.Surface = pygame.surfarray.make_surface(  # type: ignore
-                processed_frame.transpose(1, 0, 2)
+                processed_frame.transpose((1, 0, 2))
             )
             self.pygame_frame.screen.blit(camera_surf, (0, 0))
 

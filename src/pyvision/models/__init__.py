@@ -2,7 +2,6 @@
 
 from abc import ABC, abstractmethod
 
-import cv2
 from cv2.typing import MatLike
 
 
@@ -43,5 +42,4 @@ class ImageProcessingDecorator(ImageProcessingStrategy):
         Returns:
             MatLike: The processed image.
         """
-        frame = self._wrapped.process(frame)
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        return self._wrapped.process(frame)
