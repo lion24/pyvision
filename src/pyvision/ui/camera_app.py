@@ -6,7 +6,7 @@ from typing import Any, Tuple
 
 import cv2
 import pygame
-from cv2.typing import MatLike
+from cv2 import UMat
 
 from pyvision.camera.opencv import OpenCVVideoStream
 from pyvision.models import ImageProcessingStrategy
@@ -60,7 +60,7 @@ class CameraApp(tk.Tk, Observer):
 
         # set default processing strategy
         self.processing_strategy: ImageProcessingStrategy = EdgeDetectionKernelFilter(
-            NoOpFilter()
+            NoOpFilter(), ksize=3
         )
 
     def init_ui(self) -> None:
@@ -136,8 +136,13 @@ class CameraApp(tk.Tk, Observer):
 
         if self.cap is not None and self.cap.isOpened():
             frame = self.cap.read()
+            if not frame:
+                return
+
             frame = self.adjust_brightness_contrast(
-                frame, self.brightness, self.contrast
+                frame,
+                self.brightness,
+                self.contrast,
             )
             processed_frame = self.processing_strategy.process(frame)
             cv2.putText(
@@ -151,13 +156,13 @@ class CameraApp(tk.Tk, Observer):
             )
             processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             camera_surf: pygame.Surface = pygame.surfarray.make_surface(  # type: ignore
-                processed_frame.transpose((1, 0, 2))
+                processed_frame.get().transpose((1, 0, 2))
             )
             self.pygame_frame.screen.blit(camera_surf, (0, 0))
 
     def adjust_brightness_contrast(
-        self, frame: MatLike, brightness: int = 255, contrast: int = 127
-    ) -> MatLike:
+        self, frame: UMat, brightness: int = 255, contrast: int = 127
+    ) -> UMat:
         """Adjusts the brightness and contrast of an input frame.
 
         Args:
@@ -189,7 +194,7 @@ class CameraApp(tk.Tk, Observer):
             # The function addWeighted calculates
             # the weighted sum of two arrays
             cal = cv2.addWeighted(frame, al_pha, frame, 0, ga_mma)
-        else:  # type: ignore
+        else:
             cal = frame
 
         if contrast != 0:

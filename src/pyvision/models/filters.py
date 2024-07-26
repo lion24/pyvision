@@ -2,7 +2,7 @@
 
 import cv2
 import numpy as np
-from cv2.typing import MatLike
+from cv2 import UMat
 
 from pyvision.models import ImageProcessingDecorator, ImageProcessingStrategy
 
@@ -10,14 +10,14 @@ from pyvision.models import ImageProcessingDecorator, ImageProcessingStrategy
 class NoOpFilter(ImageProcessingStrategy):
     """A class representing a no-op filter for image processing."""
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         return frame
 
@@ -33,55 +33,58 @@ class IdentityFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class EdgeDetectionKernelFilter(ImageProcessingDecorator):
     """A class representing an edge detection filter for image processing."""
 
-    def __init__(self, wrapped: ImageProcessingStrategy) -> None:
+    def __init__(self, wrapped: ImageProcessingStrategy, ksize: int = 3) -> None:
         """Initialize the EdgeDetectionFilter.
 
         Args:
             wrapped (ImageProcessingStrategy): The wrapped image processing strategy.
+            ksize (int): The kernel size for the Sobel operator.
         """
-        wrapped = GrayscaleFilter(wrapped)
+        self.ksize = ksize
         wrapped = GaussianBlurKernelFilter(wrapped)
+        wrapped = GrayscaleFilter(wrapped)
         super().__init__(wrapped)
 
-        # Compute X and Y gradients using Sobel operator
-        self.sobel_x = HorizontalSobelKernelFilter(wrapped)
-        self.sobel_y = VerticalSobelKernelFilter(wrapped)
-
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
-        sobel_x = self.sobel_x.process(frame).astype(np.float32)
-        sobel_y = self.sobel_y.process(frame).astype(np.float32)
+        frame = super().process(frame)
+
+        # Compute X and Y gradients using Sobel operator
+        sobel_x = cv2.Sobel(frame, cv2.CV_64F, 1, 0, None, ksize=self.ksize)
+        sobel_y = cv2.Sobel(frame, cv2.CV_64F, 0, 1, None, ksize=self.ksize)
 
         # Compute the gradient magnitude
         magnitude = cv2.magnitude(
             sobel_x, sobel_y
         )  # equals to np.sqrt(sobel_x**2 + sobel_y**2)
 
-        return cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX)  # type: ignore
+        return cv2.normalize(
+            magnitude, frame, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8UC3
+        )
 
 
 class SharpenFilter(ImageProcessingDecorator):
@@ -95,18 +98,18 @@ class SharpenFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class UnsharpMasking5By5KernelFilter(ImageProcessingDecorator):
@@ -120,14 +123,14 @@ class UnsharpMasking5By5KernelFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = -(1 / 256.0) * np.array(
@@ -139,7 +142,7 @@ class UnsharpMasking5By5KernelFilter(ImageProcessingDecorator):
                 [1, 4, 6, 4, 1],
             ]
         )
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class GaussianBlurKernelFilter(ImageProcessingDecorator):
@@ -153,18 +156,18 @@ class GaussianBlurKernelFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = (1 / 16.0) * np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]])
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class GaussianKernelFilter(ImageProcessingDecorator):
@@ -178,14 +181,14 @@ class GaussianKernelFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = (1 / 159.0) * np.array(
@@ -197,7 +200,7 @@ class GaussianKernelFilter(ImageProcessingDecorator):
                 [2, 4, 5, 4, 2],
             ]
         )
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class GaussianSmoothingFilter(ImageProcessingDecorator):
@@ -211,14 +214,14 @@ class GaussianSmoothingFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = (1 / 273) * np.array(
@@ -230,7 +233,7 @@ class GaussianSmoothingFilter(ImageProcessingDecorator):
                 [1, 4, 7, 4, 1],
             ]
         )
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class LeftSobelKernelFilter(ImageProcessingDecorator):
@@ -244,43 +247,18 @@ class LeftSobelKernelFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
-        return cv2.filter2D(frame, -1, kernel)
-
-
-class VerticalSobelKernelFilter(ImageProcessingDecorator):
-    """A class representing a right Sobel kernel filter for image processing."""
-
-    def __init__(self, wrapped: ImageProcessingStrategy) -> None:
-        """Initialize the VerticalSobelKernelFilter.
-
-        Args:
-            wrapped (ImageProcessingStrategy): The wrapped image processing strategy.
-        """
-        super().__init__(wrapped)
-
-    def process(self, frame: MatLike) -> MatLike:
-        """Process an image.
-
-        Args:
-            frame (MatLike): The image to process.
-
-        Returns:
-            MatLike: The processed image.
-        """
-        frame = super().process(frame)
-        kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class TopSobelKernelFilter(ImageProcessingDecorator):
@@ -294,18 +272,43 @@ class TopSobelKernelFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
+
+
+class VerticalSobelKernelFilter(ImageProcessingDecorator):
+    """A class representing a right Sobel kernel filter for image processing."""
+
+    def __init__(self, wrapped: ImageProcessingStrategy) -> None:
+        """Initialize the VerticalSobelKernelFilter.
+
+        Args:
+            wrapped (ImageProcessingStrategy): The wrapped image processing strategy.
+        """
+        super().__init__(wrapped)
+
+    def process(self, frame: UMat) -> UMat:
+        """Process an image.
+
+        Args:
+            frame (UMat): The image to process.
+
+        Returns:
+            UMat: The processed image.
+        """
+        frame = super().process(frame)
+        kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class HorizontalSobelKernelFilter(ImageProcessingDecorator):
@@ -319,18 +322,18 @@ class HorizontalSobelKernelFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class LapaclacianKernelFilter(ImageProcessingDecorator):
@@ -344,18 +347,18 @@ class LapaclacianKernelFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         kernel = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
-        return cv2.filter2D(frame, -1, kernel)
+        return cv2.filter2D(frame, -1, cv2.UMat(kernel))  # type: ignore
 
 
 class LOGKernelFilter(ImageProcessingDecorator):
@@ -369,14 +372,14 @@ class LOGKernelFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         return cv2.Laplacian(cv2.GaussianBlur(gray, (3, 3), 0), -1)
@@ -393,14 +396,14 @@ class CannyFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         frame = super().process(frame)
         return cv2.Canny(frame, 100, 200)
@@ -417,16 +420,13 @@ class GrayscaleFilter(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
 
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
-        frame = super().process(frame)
-        weights = np.array([0.2989, 0.5870, 0.1140])
-        gray_image = np.dot(frame[..., :3], weights)
-        return gray_image.astype(np.uint8)
+        return cv2.cvtColor(super().process(frame), cv2.COLOR_BGR2GRAY)
