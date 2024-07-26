@@ -56,6 +56,6 @@ class PygameFrame(tk.Frame, ConcreteSubject):
 
     def update_pygame(self):
         """Updates the Pygame display and notifies the observers."""
-        pygame.display.flip()
+        pygame.display.update()
         self.notify()
         self.after(1000 // self.fps, self.update_pygame)

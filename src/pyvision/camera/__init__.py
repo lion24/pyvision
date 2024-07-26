@@ -1,6 +1,7 @@
 """Camera module related to camera operations."""
 
 import abc
+from typing import Any
 
 
 class VideoStreamProvider(metaclass=abc.ABCMeta):
@@ -22,7 +23,7 @@ class VideoStreamProvider(metaclass=abc.ABCMeta):
             bool: True if the subclass implements all the required methods, False otherwise.
         """
         if cls is VideoStreamProvider:
-            required_methods = {"start", "update", "read", "stop", "isOpened"}
+            required_methods = {"start", "update", "read", "stop", "info", "isOpened"}
             if all(
                 any(method in B.__dict__ for B in subclass.__mro__)
                 for method in required_methods
@@ -49,6 +50,11 @@ class VideoStreamProvider(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def stop(cls):
         """Stop the streaming service."""
+
+    @classmethod
+    @abc.abstractmethod
+    def info(cls) -> dict[str, Any]:
+        """Return the information about the video stream."""
 
     @classmethod
     @abc.abstractmethod
