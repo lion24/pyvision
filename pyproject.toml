@@ -11,7 +11,7 @@ dependencies = [
     "numpy==2.0.1",
     "opencv-python==4.10.0.84",
     "pre-commit==3.7.1",
-    "pylint==3.2.5",
+    "pylint==3.2.6",
     "pygame==2.6.0",
     "rethinkdb==2.4.10.post1",
     "ruff==0.5.2",
