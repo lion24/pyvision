@@ -2,21 +2,21 @@
 
 from abc import ABC, abstractmethod
 
-from cv2.typing import MatLike
+from cv2 import UMat
 
 
 class ImageProcessingStrategy(ABC):
     """Abstract base class for image processing strategies."""
 
     @abstractmethod
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         pass
 
@@ -33,13 +33,13 @@ class ImageProcessingDecorator(ImageProcessingStrategy):
         self._wrapped = wrapped
 
     @abstractmethod
-    def process(self, frame: MatLike) -> MatLike:
+    def process(self, frame: UMat) -> UMat:
         """Process an image.
 
         Args:
-            frame (MatLike): The image to process.
+            frame (UMat): The image to process.
 
         Returns:
-            MatLike: The processed image.
+            UMat: The processed image.
         """
         return self._wrapped.process(frame)
