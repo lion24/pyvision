@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.0](https://github.com/lion24/pyvision/compare/v0.0.1...v0.1.0) (2024-07-29)
+
+
+### Features
+
+* allow to adjust brightness and contrast ([2825606](https://github.com/lion24/pyvision/commit/28256061482308c76300f41434065b1375b5d729))
+* **filters:** introduce some filters. ([2de2083](https://github.com/lion24/pyvision/commit/2de2083ec5f5c52460303d5861dd0e06e3baea55))
+* use GPU for render and computing ([378ecbf](https://github.com/lion24/pyvision/commit/378ecbf20d5ee756dcecc6618767615352505f0a))
+
 ## [0.0.1](https://github.com/lion24/pyvision/compare/0.0.0...v0.0.1) (2024-07-12)
 
 
