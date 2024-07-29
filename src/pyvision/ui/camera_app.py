@@ -145,6 +145,7 @@ class CameraApp(tk.Tk, Observer):
                 self.contrast,
             )
             processed_frame = self.processing_strategy.process(frame)
+            processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             cv2.putText(
                 processed_frame,
                 "{:.0f} frame/s".format(self.cap.info()["fps"]),
@@ -154,7 +155,6 @@ class CameraApp(tk.Tk, Observer):
                 (0, 255, 0),
                 1,
             )
-            processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             camera_surf: pygame.Surface = pygame.surfarray.make_surface(  # type: ignore
                 processed_frame.get().transpose((1, 0, 2))
             )
