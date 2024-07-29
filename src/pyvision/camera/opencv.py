@@ -3,7 +3,7 @@
 import threading
 import time
 from queue import Empty, Queue
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import cv2
 from cv2 import VideoCapture
@@ -22,7 +22,6 @@ class OpenCVVideoStream:
         width: int = 960,
         height: int = 540,
         desired_fps: int = 24,
-        queuesize: int = 128,
     ) -> None:
         """Initialize the OpenCVVideoStream object.
 
@@ -31,7 +30,6 @@ class OpenCVVideoStream:
             width (int): Width of the video frame.
             height (int): Height of the video frame.
             desired_fps (int): Desired frames per second.
-            queuesize (int): Size of the queue storing the video frames.
 
         """
         self.idx = idx
@@ -54,11 +52,7 @@ class OpenCVVideoStream:
         desired_fps = min(desired_fps, int(max_supported_fps))
         self.fps = FPS(desired_fps)
 
-        self.Q: Queue[int] = Queue(maxsize=queuesize)
-
-        self.frames: List[Optional[cv2.UMat]] = [None] * queuesize
-        for i in range(queuesize):
-            self.frames[i] = cv2.UMat(self.height, self.width, cv2.CV_8UC3)
+        self.Q: Queue[Optional[cv2.UMat]] = Queue()
 
     def update(self):
         """Update the video stream frames.
@@ -66,16 +60,20 @@ class OpenCVVideoStream:
         This method continuously reads frames from the video stream and updates the frame attribute.
 
         """
+        frame = cv2.UMat(self.height, self.width, cv2.CV_8UC3)
+
         while not self.stop_event.is_set():
             if self.stream.isOpened() and not self.Q.full():
                 self.count += 1
-                target = (self.count - 1) % self.Q.maxsize
                 grabbed = self.stream.grab()
                 if not grabbed:
                     self.stop()
                     return
 
-                self.stream.retrieve(self.frames[target])
+                success, _ = self.stream.retrieve(frame)
+                if not success:
+                    self.stop()
+                    return
 
                 if not self.Q.empty():
                     try:
@@ -83,7 +81,7 @@ class OpenCVVideoStream:
                     except Empty:
                         pass
 
-                self.Q.put(target)
+                self.Q.put(frame)
 
                 self.fps.update(False)
 
@@ -111,7 +109,7 @@ class OpenCVVideoStream:
             time.sleep(0.1)
 
         # return the next frame in the queue
-        return self.frames[self.Q.get()]
+        return self.Q.get()
 
     def more(self):
         """Check if there are more frames to read."""
