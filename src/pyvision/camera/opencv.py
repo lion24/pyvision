@@ -3,7 +3,7 @@
 import threading
 import time
 from queue import Empty, Queue
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import cv2
 from cv2 import VideoCapture
@@ -18,7 +18,7 @@ class OpenCVVideoStream:
 
     def __init__(
         self,
-        idx: int = 0,
+        path: Union[int, str],
         width: int = 960,
         height: int = 540,
         desired_fps: int = 24,
@@ -26,19 +26,19 @@ class OpenCVVideoStream:
         """Initialize the OpenCVVideoStream object.
 
         Args:
-            idx (int): Index of the video capture device.
+            path (Union[int, str]): Index or path of the video capture device.
             width (int): Width of the video frame.
             height (int): Height of the video frame.
             desired_fps (int): Desired frames per second.
 
         """
-        self.idx = idx
+        self.path = path
         self.width = width
         self.height = height
         self.count = 0
         self.stop_event: threading.Event = threading.Event()
         self.update_thread: threading.Thread = threading.Thread(target=self.update)
-        self.stream: VideoCapture = cv2.VideoCapture(idx, cv2.CAP_MSMF)
+        self.stream: VideoCapture = cv2.VideoCapture(path, cv2.CAP_MSMF)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         print("current exposure: ", self.stream.get(cv2.CAP_PROP_EXPOSURE))
@@ -137,7 +137,7 @@ class OpenCVVideoStream:
             "width": self.width,
             "height": self.height,
             "fps": self.fps.get_fps(),
-            "idx": self.idx,
+            "path": self.path,
         }
 
     def isOpened(self) -> bool:
@@ -147,4 +147,4 @@ class OpenCVVideoStream:
             bool: True if the video stream is opened, False otherwise.
 
         """
-        return self.stream.isOpened() if self.stream else False
+        return self.stream.isOpened()
