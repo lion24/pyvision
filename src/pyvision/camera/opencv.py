@@ -3,7 +3,7 @@
 import threading
 import time
 from queue import Empty, Queue
-from typing import Any, List, Optional
+from typing import Any, Optional, Union
 
 import cv2
 from cv2 import VideoCapture
@@ -18,33 +18,29 @@ class OpenCVVideoStream:
 
     def __init__(
         self,
-        idx: int = 0,
+        path: Union[int, str],
         width: int = 960,
         height: int = 540,
         desired_fps: int = 24,
-        queuesize: int = 128,
     ) -> None:
         """Initialize the OpenCVVideoStream object.
 
         Args:
-            idx (int): Index of the video capture device.
+            path (Union[int, str]): Index or path of the video capture device.
             width (int): Width of the video frame.
             height (int): Height of the video frame.
             desired_fps (int): Desired frames per second.
-            queuesize (int): Size of the queue storing the video frames.
 
         """
-        self.idx = idx
+        self.path = path
         self.width = width
         self.height = height
         self.count = 0
         self.stop_event: threading.Event = threading.Event()
         self.update_thread: threading.Thread = threading.Thread(target=self.update)
-        self.stream: VideoCapture = cv2.VideoCapture(idx, cv2.CAP_MSMF)
+        self.stream: VideoCapture = cv2.VideoCapture(path, cv2.CAP_MSMF)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        print("current exposure: ", self.stream.get(cv2.CAP_PROP_EXPOSURE))
-        self.stream.set(cv2.CAP_PROP_EXPOSURE, 0)
 
         max_supported_fps = self.stream.get(cv2.CAP_PROP_FPS)
         if desired_fps > max_supported_fps:
@@ -54,11 +50,7 @@ class OpenCVVideoStream:
         desired_fps = min(desired_fps, int(max_supported_fps))
         self.fps = FPS(desired_fps)
 
-        self.Q: Queue[int] = Queue(maxsize=queuesize)
-
-        self.frames: List[Optional[cv2.UMat]] = [None] * queuesize
-        for i in range(queuesize):
-            self.frames[i] = cv2.UMat(self.height, self.width, cv2.CV_8UC3)
+        self.Q: Queue[Optional[cv2.UMat]] = Queue()
 
     def update(self):
         """Update the video stream frames.
@@ -66,16 +58,20 @@ class OpenCVVideoStream:
         This method continuously reads frames from the video stream and updates the frame attribute.
 
         """
+        frame = cv2.UMat(self.height, self.width, cv2.CV_8UC3)
+
         while not self.stop_event.is_set():
             if self.stream.isOpened() and not self.Q.full():
                 self.count += 1
-                target = (self.count - 1) % self.Q.maxsize
                 grabbed = self.stream.grab()
                 if not grabbed:
                     self.stop()
                     return
 
-                self.stream.retrieve(self.frames[target])
+                success, _ = self.stream.retrieve(frame)
+                if not success:
+                    self.stop()
+                    return
 
                 if not self.Q.empty():
                     try:
@@ -83,7 +79,7 @@ class OpenCVVideoStream:
                     except Empty:
                         pass
 
-                self.Q.put(target)
+                self.Q.put(frame)
 
                 self.fps.update(False)
 
@@ -111,7 +107,7 @@ class OpenCVVideoStream:
             time.sleep(0.1)
 
         # return the next frame in the queue
-        return self.frames[self.Q.get()]
+        return self.Q.get()
 
     def more(self):
         """Check if there are more frames to read."""
@@ -139,7 +135,7 @@ class OpenCVVideoStream:
             "width": self.width,
             "height": self.height,
             "fps": self.fps.get_fps(),
-            "idx": self.idx,
+            "path": self.path,
         }
 
     def isOpened(self) -> bool:
@@ -149,4 +145,4 @@ class OpenCVVideoStream:
             bool: True if the video stream is opened, False otherwise.
 
         """
-        return self.stream.isOpened() if self.stream else False
+        return self.stream.isOpened()
