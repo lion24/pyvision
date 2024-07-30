@@ -41,8 +41,6 @@ class OpenCVVideoStream:
         self.stream: VideoCapture = cv2.VideoCapture(path, cv2.CAP_MSMF)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        print("current exposure: ", self.stream.get(cv2.CAP_PROP_EXPOSURE))
-        self.stream.set(cv2.CAP_PROP_EXPOSURE, 0)
 
         max_supported_fps = self.stream.get(cv2.CAP_PROP_FPS)
         if desired_fps > max_supported_fps:
