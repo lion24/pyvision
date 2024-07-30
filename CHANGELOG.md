@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0](https://github.com/lion24/pyvision/compare/v0.1.0...v0.2.0) (2024-07-30)
+
+
+### Features
+
+* **opencv:** allow str and int as source ([ecf7406](https://github.com/lion24/pyvision/commit/ecf740664d6dc3cf5139aae0b5383a6069ef2720))
+
+
+### Bug Fixes
+
+* **fps:** wrong calculation ([7b54a51](https://github.com/lion24/pyvision/commit/7b54a51f029d245e71c01aabc3ab973b1834a830))
+* **opencv:** let the device managed the exposure ([c5b09ba](https://github.com/lion24/pyvision/commit/c5b09ba849d45980de259c99cd720b32ac0a3ddc))
+* **opencv:** queue size of 1 ([18fffb6](https://github.com/lion24/pyvision/commit/18fffb63ce828d7ed52d5ecbc6721d8fcb54c70b))
+* **ui:** fps counter was not visible ([7cc164c](https://github.com/lion24/pyvision/commit/7cc164c3f6e3881c18b03e64388dd324474991d0))
+
 ## [0.1.0](https://github.com/lion24/pyvision/compare/v0.0.1...v0.1.0) (2024-07-29)
 
 
