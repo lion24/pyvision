@@ -9,11 +9,11 @@ import pygame
 from cv2 import UMat
 
 from pyvision.camera.opencv import OpenCVVideoStream
-from pyvision.models import ImageProcessingStrategy
 from pyvision.models.filters import (
     EdgeDetectionKernelFilter,
     NoOpFilter,
 )
+from pyvision.models.processing import ImageProcessor
 from pyvision.ui.pygame_frame import PygameFrame
 from pyvision.utils.observer import ConcreteSubject, Observer, Subject
 
@@ -58,9 +58,10 @@ class CameraApp(tk.Tk, Observer):
         self.init_ui()
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-        # set default processing strategy
-        self.processing_strategy: ImageProcessingStrategy = EdgeDetectionKernelFilter(
-            NoOpFilter(), ksize=3
+        # To be moved in a controller class
+        self.processor = ImageProcessor()
+        self.processor.add_filter(
+            EdgeDetectionKernelFilter(NoOpFilter(), ksize=3).process
         )
 
     def init_ui(self) -> None:
@@ -144,7 +145,7 @@ class CameraApp(tk.Tk, Observer):
                 self.brightness,
                 self.contrast,
             )
-            processed_frame = self.processing_strategy.process(frame)
+            processed_frame = self.processor.process(frame)
             processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             cv2.putText(
                 processed_frame,
