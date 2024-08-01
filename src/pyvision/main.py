@@ -9,7 +9,7 @@ os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 import cv2
 
 from pyvision import utils
-from pyvision.ui.camera_app import CameraApp
+from pyvision.views.camera import CameraApp
 
 FRAME_PER_SECONDS = 32
 

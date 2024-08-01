@@ -14,8 +14,8 @@ from pyvision.models.filters import (
     NoOpFilter,
 )
 from pyvision.models.processing import ImageProcessor
-from pyvision.ui.pygame_frame import PygameFrame
 from pyvision.utils.observer import ConcreteSubject, Observer, Subject
+from pyvision.views.pygame import PygameFrame
 
 
 class CameraApp(tk.Tk, Observer):
