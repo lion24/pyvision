@@ -5,8 +5,10 @@ import timeit
 from collections import deque
 from typing import Deque
 
+from pyvision.utils.observer import ConcreteSubject
 
-class FPS:
+
+class FPS(ConcreteSubject):
     """Class to calculate frames per second (FPS).
 
     This class provides methods to calculate the frames per second (FPS) of a process.
@@ -21,13 +23,14 @@ class FPS:
         max_samples (int): Maximum number of samples to keep in the deque.
     """
 
-    def __init__(self, throttle_fps: int = 30, max_samples: int = 30):
+    def __init__(self, throttle_fps: int = 30, max_samples: int = 300):
         """Initialize the FPS object.
 
         Args:
             throttle_fps (int): The desired FPS to throttle the update method (default: 30).
             max_samples (int): Maximum number of samples to keep in the deque for smoothing (default: 10).
         """
+        ConcreteSubject.__init__(self)
         self.prev_time = timeit.default_timer()
         self.delta_time = 0.0
         self.throttle_fps = throttle_fps
@@ -61,10 +64,12 @@ class FPS:
             if sleep_time > 0.0:
                 time.sleep(sleep_time)
 
-    def get_fps(self):
+        self.notify()
+
+    def get_fps(self) -> int:
         """Get the current frames per second (FPS).
 
         Returns:
             float: The current FPS.
         """
-        return self.fps
+        return int(self.fps)
