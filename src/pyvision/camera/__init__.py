@@ -3,6 +3,8 @@
 import abc
 from typing import Any
 
+# TODO: maybe we should moved this in Models?
+
 
 class VideoStreamProvider(metaclass=abc.ABCMeta):
     """Each video stream provider will need to implement this interface.

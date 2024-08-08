@@ -1,3 +1,0 @@
-from typing import List, Tuple
-
-def getDeviceList() -> List[Tuple[str, List[str]]]: ...
