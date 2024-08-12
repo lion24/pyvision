@@ -2,9 +2,9 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, Callable, Tuple
+from typing import Any, Callable
 
-from pyvision.utils.observer import ConcreteSubject, Subject
+from pyvision.utils.observer import ConcreteSubject
 from pyvision.views.root import Root
 from pyvision.views.video import VideoView
 
@@ -63,45 +63,45 @@ class MainView(tk.Frame):
             print("No camera selected")
             return
 
-    def notify_update(
-        self, subject: Subject, *args: Tuple[Any], **kwargs: dict[str, Any]
-    ) -> None:
-        """Called every time an update from a subject is requested.
+    # def notify_update(
+    #     self, subject: Subject, *args: Tuple[Any], **kwargs: dict[str, Any]
+    # ) -> None:
+    #     """Called every time an update from a subject is requested.
 
-        This call will have the effect of refreshing the image displayed.
+    #     This call will have the effect of refreshing the image displayed.
 
-        Args:
-            subject (Subject): The subject that triggered the update.
-            *args (Tuple[Any]): Additional arguments.
-            **kwargs (dict[str, Any]): Additional keyword arguments.
+    #     Args:
+    #         subject (Subject): The subject that triggered the update.
+    #         *args (Tuple[Any]): Additional arguments.
+    #         **kwargs (dict[str, Any]): Additional keyword arguments.
 
-        """
-        if isinstance(subject, CameraSelectionFrame):
-            print("Camera selected")
-            self.on_camera_select(*args)
-        elif isinstance(subject, ImageBrightnessAndContrastFrame):
-            print(
-                f"Brightness and contrast updated {self.brightness} : {self.contrast}"
-            )
-            self.brightness = self.brightness_and_contrast_frame.get_brightness()
-            self.contrast = self.brightness_and_contrast_frame.get_contrast()
+    #     """
+    #     if isinstance(subject, CameraSelectionFrame):
+    #         print("Camera selected")
+    #         self.on_camera_select(*args)
+    #     elif isinstance(subject, ImageBrightnessAndContrastFrame):
+    #         print(
+    #             f"Brightness and contrast updated {self.brightness} : {self.contrast}"
+    #         )
+    #         self.brightness = self.brightness_and_contrast_frame.get_brightness()
+    #         self.contrast = self.brightness_and_contrast_frame.get_contrast()
 
-            # frame = self.adjust_brightness_contrast(
-            #     frame,
-            #     self.brightness,
-            #     self.contrast,
-            # )
-            # processed_frame = self.processor.process(frame)
-            # processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
-            # cv2.putText(
-            #     processed_frame,
-            #     "{:.0f} frame/s".format(self.cap.info()["fps"]),
-            #     (self.root.width - 180, self.root.height - 40),
-            #     cv2.FONT_HERSHEY_TRIPLEX,
-            #     1.0,
-            #     (0, 255, 0),
-            #     1,
-            # )
+    # frame = self.adjust_brightness_contrast(
+    #     frame,
+    #     self.brightness,
+    #     self.contrast,
+    # )
+    # processed_frame = self.processor.process(frame)
+    # processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
+    # cv2.putText(
+    #     processed_frame,
+    #     "{:.0f} frame/s".format(self.cap.info()["fps"]),
+    #     (self.root.width - 180, self.root.height - 40),
+    #     cv2.FONT_HERSHEY_TRIPLEX,
+    #     1.0,
+    #     (0, 255, 0),
+    #     1,
+    # )
 
     # def adjust_brightness_contrast(
     #     self, frame: UMat, brightness: int = 255, contrast: int = 127
