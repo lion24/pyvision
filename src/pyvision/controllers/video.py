@@ -44,6 +44,13 @@ class VideoController(Observer):
         self.fps = FPS(throttle_fps=self.model.fps)
         self.fps.attach(self)
 
+        # Actions hastable to call the corresponding function based on the subject
+        self.actions = {
+            self.fps: lambda: self.view.video_view.update_fps(self.fps.get_fps()),
+            self.model: lambda: self.view.video_view.update_frame(self.model.frame),
+            self.camera_model: self.handle_camera_update,
+        }
+
         # Add filters to the model
         self.model.add_filter(EdgeDetectionKernelFilter(NoOpFilter()).process)
         self._bind()
@@ -139,14 +146,16 @@ class VideoController(Observer):
             **kwargs (dict[str, Any]): Additional keyword arguments.
 
         """
-        if subject == self.fps:
-            self.view.video_view.update_fps(self.fps.get_fps())
+        # Call the appropriate action based on the subject
+        # This is a way to avoid using if-elif-else statements
+        # Since we know the subject is one of the keys in the actions dictionary
+        # we can call the corresponding value (a function) using the subject as the key
+        # and ignore the type check since we know the key is in the dictionary
+        self.actions[subject]()  # type: ignore
 
-        if subject == self.model:
-            self.view.video_view.update_frame(self.model.frame)
-
-        if subject == self.camera_model:
-            print("new camera update: ", self.camera_model.selected_camera)
-            self.stop_thread()
-            self.model.stream.update_stream_path(self.camera_model.selected_camera)
-            self.start()
+    def handle_camera_update(self):
+        """Handle the camera update event."""
+        print("new camera update: ", self.camera_model.selected_camera)
+        self.stop_thread()
+        self.model.stream.update_stream_path(self.camera_model.selected_camera)
+        self.start()
