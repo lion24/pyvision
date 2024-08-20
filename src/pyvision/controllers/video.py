@@ -5,8 +5,8 @@ from typing import Any, Tuple
 
 from pyvision.models.camera import CameraModel
 from pyvision.models.filters import (
-    EdgeDetectionKernelFilter,
     NoOpFilter,
+    YUNetFaceDetectionFilter,
 )
 from pyvision.models.opencv_stream import READ_ERROR
 from pyvision.models.stream import StreamModel
@@ -52,7 +52,7 @@ class VideoController(Observer):
         }
 
         # Add filters to the model
-        self.model.add_filter(EdgeDetectionKernelFilter(NoOpFilter()).process)
+        self.model.add_filter(YUNetFaceDetectionFilter(NoOpFilter()).process)
         self._bind()
 
     def _bind(self):
@@ -96,7 +96,7 @@ class VideoController(Observer):
                     self.stop_thread()
                     return
                 case READ_ERROR.NO_ERROR:
-                    self.model.process(frame)
+                    self.model.process(frame.get())
                     self.fps.update(throttle=True)
 
     def start(self):

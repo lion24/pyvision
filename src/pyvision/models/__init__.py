@@ -2,18 +2,23 @@
 
 from abc import ABC, abstractmethod
 
+import numpy as np
 from cv2 import UMat
+from cv2.typing import MatLike
+from numpy.typing import NDArray
+
+Image = MatLike | NDArray[np.uint8] | NDArray[np.float32]
 
 
 class ImageProcessingStrategy(ABC):
     """Abstract base class for image processing strategies."""
 
     @abstractmethod
-    def process(self, frame: UMat) -> UMat:
+    def process(self, _frame: Image) -> UMat:
         """Process an image.
 
         Args:
-            frame (UMat): The image to process.
+            frame (Image): The image to process.
 
         Returns:
             UMat: The processed image.
@@ -33,13 +38,13 @@ class ImageProcessingDecorator(ImageProcessingStrategy):
         self._wrapped = wrapped
 
     @abstractmethod
-    def process(self, frame: UMat) -> UMat:
+    def process(self, _frame: Image) -> UMat:
         """Process an image.
 
         Args:
-            frame (UMat): The image to process.
+            frame (Image): The image to process.
 
         Returns:
             UMat: The processed image.
         """
-        return self._wrapped.process(frame)
+        return self._wrapped.process(_frame)

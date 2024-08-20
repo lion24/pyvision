@@ -18,6 +18,10 @@ if __name__ == "__main__":
     print("OpenCV version: ", cv2.__version__)
     print(cv2.getBuildInformation())
 
+    cv2.ocl.setUseOpenCL(True)
+    if cv2.ocl.haveOpenCL():
+        print("OpenCL is available")
+
     stream_settings: StreamSettings = {
         "path": 0,
         "width": 1280,

@@ -41,7 +41,9 @@ class OpenCVVideoStream:
         self.height = kwargs.get("height", 540)
         self.desired_fps = kwargs.get("desired_fps", 24)
         self.update_stream_path(path)
-        self.frame = cv2.UMat(self.height, self.width, cv2.CV_8UC3)
+        self.frame = cv2.UMat(
+            self.height, self.width, cv2.CV_8UC3, cv2.USAGE_ALLOCATE_DEVICE_MEMORY
+        )
 
     def update_stream_path(self, path: Union[int, str]) -> cv2.VideoCapture:
         """Update the stream path and configure the video capture object.
