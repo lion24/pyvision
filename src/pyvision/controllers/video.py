@@ -1,15 +1,22 @@
 """This module contains the VideoController class."""
 
+import os
 import threading
 from typing import Any, Tuple
+
+# Otherwise, torch backend will spit out a lot of debug messages
+os.environ["YOLO_VERBOSE"] = "False"
+
+from ultralytics import YOLO  # type: ignore
 
 from pyvision.models.camera import CameraModel
 from pyvision.models.filters import (
     NoOpFilter,
-    YUNetFaceDetectionFilter,
 )
 from pyvision.models.opencv_stream import READ_ERROR
 from pyvision.models.stream import StreamModel
+from pyvision.models.yolo import YoloObjectDetection
+from pyvision.utils import check_file_exists, download_to
 from pyvision.utils.fps import FPS
 from pyvision.utils.observer import Observer, Subject
 from pyvision.views.main import View
@@ -51,8 +58,21 @@ class VideoController(Observer):
             self.camera_model: self.handle_camera_update,
         }
 
+        # Load Yolo pretrained model
+        # Check if the model exists, if not download it
+        if not check_file_exists("yolo/yolov9t.pt"):
+            download_to(
+                "yolo/yolov9t.pt",
+                "https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov9t.pt",
+            )
+
+        yolo_model = YOLO("yolo/yolov9t.pt", verbose=False)
+        print(f"info: {yolo_model.info()}")
+
         # Add filters to the model
-        self.model.add_filter(YUNetFaceDetectionFilter(NoOpFilter()).process)
+        self.model.add_filter(
+            YoloObjectDetection(model=yolo_model, wrapped=NoOpFilter()).process
+        )
         self._bind()
 
     def _bind(self):
