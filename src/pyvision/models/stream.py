@@ -17,6 +17,7 @@ class StreamModel(ConcreteSubject):
         ConcreteSubject.__init__(self)
         self.filters: List[Callable[[Image], cv2.UMat]] = []
         self.stream = stream
+        self.stream.start()
         self.width = self.stream.width
         self.height = self.stream.height
         self.fps = self.stream.fps
