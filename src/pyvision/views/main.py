@@ -2,11 +2,14 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, Callable
+from typing import Any, Callable, Union
 
 from pyvision.utils.observer import ConcreteSubject
 from pyvision.views.root import Root
 from pyvision.views.video import VideoView
+
+CameraSelectionType = Union[tk.StringVar, str]
+CameraSelectionCallback = Callable[[CameraSelectionType], None]
 
 
 class View:
@@ -47,21 +50,6 @@ class MainView(tk.Frame):
 
         self.brightness_and_contrast_frame = ImageBrightnessAndContrastFrame(self)
         self.brightness_and_contrast_frame.pack()
-
-    def on_camera_select(self, *args: Any) -> None:
-        """Callback function called when a camera is selected from the dropdown menu.
-
-        Args:
-            *args (Any): Additional arguments.
-
-        """
-        if self.camera_menu is None:
-            return
-
-        idx = self.camera_menu.get_selected_camera()
-        if idx == -1:
-            print("No camera selected")
-            return
 
     # def notify_update(
     #     self, subject: Subject, *args: Tuple[Any], **kwargs: dict[str, Any]
@@ -194,23 +182,27 @@ class CameraSelectionFrame(tk.Frame):
         super().__init__(master, **kwargs)
         self.camera_opt = tk.StringVar(self)
         self.camera_opt.set("Select camera")
-        self.menu = ttk.OptionMenu(self, self.camera_opt, "Select camera")
+        self.menu = ttk.OptionMenu(
+            self,
+            self.camera_opt,
+            "Select camera",
+            command=self.on_camera_select,
+        )
         self.menu.pack()
-        self.camera_opt.trace_add("write", self.on_camera_select)
+        # self.camera_opt.trace_add("write", self.on_camera_select)
         self.on_select_callback = None
 
-    def on_camera_select(self, *args: Any) -> None:
+    def on_camera_select(self, event: tk.StringVar):
         """Callback function called when a camera is selected from the dropdown menu.
 
         Args:
-            *args (Any): Additional arguments.
+            event (tk.StringVar): The selected camera.
 
         """
         if self.on_select_callback:
-            selected_camera = self.camera_opt.get()
-            self.on_select_callback(selected_camera)
+            self.on_select_callback(event)
 
-    def set_on_select_callback(self, callback: Callable[[str], None]) -> None:
+    def set_on_select_callback(self, callback: CameraSelectionCallback) -> None:
         """Set the callback function to be called when a camera is selected.
 
         Args:
@@ -218,19 +210,6 @@ class CameraSelectionFrame(tk.Frame):
 
         """
         self.on_select_callback = callback
-
-        # self.camera_opt.trace_add("write", parent.on_camera_select)
-        # if next(iter(self.cameras.keys()), "Select camera") != "Select camera":
-        #     self.camera_opt.set(next(iter(self.cameras.keys())))
-
-    def get_selected_camera(self) -> str:
-        """Get the selected camera index.
-
-        Returns:
-            int: The selected camera index.
-
-        """
-        return self.camera_opt.get()
 
 
 class ImageBrightnessAndContrastFrame(tk.Frame, ConcreteSubject):

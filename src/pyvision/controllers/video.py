@@ -19,7 +19,7 @@ from pyvision.models.yolo import YoloObjectDetection
 from pyvision.utils import check_file_exists, download_to
 from pyvision.utils.fps import FPS
 from pyvision.utils.observer import Observer, Subject
-from pyvision.views.main import View
+from pyvision.views.main import CameraSelectionType, View
 
 
 # The VideoController is an observer of the VideoModel and controls the video stream.
@@ -87,14 +87,16 @@ class VideoController(Observer):
 
         self.view.camera_menu_view.set_on_select_callback(self.select_camera)
 
-    def select_camera(self, camera_name: str):
+    def select_camera(self, camera_name: CameraSelectionType):
         """Select a camera by its name.
 
         Args:
-            camera_name (str): The name of the camera to select.
+            camera_name (CameraSelectionType): The name of the camera to select.
 
         """
-        self.camera_model.select_camera(camera_name)
+        # CameraSelectionType is either str or tk.StringVar, which is a string,
+        # so we can safely cast it to str
+        self.camera_model.select_camera(str(camera_name))
 
     def update(self):
         """Update the video stream frames.
