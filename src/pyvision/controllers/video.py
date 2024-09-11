@@ -1,18 +1,25 @@
 """This module contains the VideoController class."""
 
+import os
 import threading
 from typing import Any, Tuple
 
+# Otherwise, torch backend will spit out a lot of debug messages
+os.environ["YOLO_VERBOSE"] = "False"
+
+from ultralytics import YOLO  # type: ignore
+
 from pyvision.models.camera import CameraModel
 from pyvision.models.filters import (
-    EdgeDetectionKernelFilter,
     NoOpFilter,
 )
 from pyvision.models.opencv_stream import READ_ERROR
 from pyvision.models.stream import StreamModel
+from pyvision.models.yolo import YoloObjectDetection
+from pyvision.utils import check_file_exists, download_to
 from pyvision.utils.fps import FPS
 from pyvision.utils.observer import Observer, Subject
-from pyvision.views.main import View
+from pyvision.views.main import CameraSelectionType, View
 
 
 # The VideoController is an observer of the VideoModel and controls the video stream.
@@ -44,8 +51,28 @@ class VideoController(Observer):
         self.fps = FPS(throttle_fps=self.model.fps)
         self.fps.attach(self)
 
+        # Actions hastable to call the corresponding function based on the subject
+        self.actions = {
+            self.fps: lambda: self.view.video_view.update_fps(self.fps.get_fps()),
+            self.model: lambda: self.view.video_view.update_frame(self.model.frame),
+            self.camera_model: self.handle_camera_update,
+        }
+
+        # Load Yolo pretrained model
+        # Check if the model exists, if not download it
+        if not check_file_exists("yolo/yolov9t.pt"):
+            download_to(
+                "yolo/yolov9t.pt",
+                "https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov9t.pt",
+            )
+
+        yolo_model = YOLO("yolo/yolov9t.pt", verbose=False)
+        print(f"info: {yolo_model.info()}")
+
         # Add filters to the model
-        self.model.add_filter(EdgeDetectionKernelFilter(NoOpFilter()).process)
+        self.model.add_filter(
+            YoloObjectDetection(model=yolo_model, wrapped=NoOpFilter()).process
+        )
         self._bind()
 
     def _bind(self):
@@ -60,14 +87,16 @@ class VideoController(Observer):
 
         self.view.camera_menu_view.set_on_select_callback(self.select_camera)
 
-    def select_camera(self, camera_name: str):
+    def select_camera(self, camera_name: CameraSelectionType):
         """Select a camera by its name.
 
         Args:
-            camera_name (str): The name of the camera to select.
+            camera_name (CameraSelectionType): The name of the camera to select.
 
         """
-        self.camera_model.select_camera(camera_name)
+        # CameraSelectionType is either str or tk.StringVar, which is a string,
+        # so we can safely cast it to str
+        self.camera_model.select_camera(str(camera_name))
 
     def update(self):
         """Update the video stream frames.
@@ -89,7 +118,7 @@ class VideoController(Observer):
                     self.stop_thread()
                     return
                 case READ_ERROR.NO_ERROR:
-                    self.model.process(frame)
+                    self.model.process(frame.get())
                     self.fps.update(throttle=True)
 
     def start(self):
@@ -139,14 +168,16 @@ class VideoController(Observer):
             **kwargs (dict[str, Any]): Additional keyword arguments.
 
         """
-        if subject == self.fps:
-            self.view.video_view.update_fps(self.fps.get_fps())
+        # Call the appropriate action based on the subject
+        # This is a way to avoid using if-elif-else statements
+        # Since we know the subject is one of the keys in the actions dictionary
+        # we can call the corresponding value (a function) using the subject as the key
+        # and ignore the type check since we know the key is in the dictionary
+        self.actions[subject]()  # type: ignore
 
-        if subject == self.model:
-            self.view.video_view.update_frame(self.model.frame)
-
-        if subject == self.camera_model:
-            print("new camera update: ", self.camera_model.selected_camera)
-            self.stop_thread()
-            self.model.stream.update_stream_path(self.camera_model.selected_camera)
-            self.start()
+    def handle_camera_update(self):
+        """Handle the camera update event."""
+        print("new camera update: ", self.camera_model.selected_camera)
+        self.stop_thread()
+        self.model.stream.update_stream_path(self.camera_model.selected_camera)
+        self.start()

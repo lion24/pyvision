@@ -7,8 +7,9 @@ name = "pyvision"
 dynamic = ["version"]
 description = "Pyvision: a framework to detect objects"
 dependencies = [
+    "debugpy==1.8.5",
     "looseversion==1.3.0",
-    "numpy==2.1.0",
+    "numpy>=1.23.0,<2.0.0", # Needed to pin a specific version for ultralytics
     "opencv-python==4.10.0.84",
     "pre-commit==3.8.0",
     "pylint==3.2.6",
@@ -17,14 +18,19 @@ dependencies = [
     "ruff==0.6.1",
     "six==1.16.0",
     "thinker==1.1.1",
-    "typing_extensions==4.12.2"
+    "torch>=1.8.0,<2.4.0; sys_platform == 'win32'",  # Windows CPU errors https://github.com/ultralytics/ultralytics/issues/15049
+    "torch>=1.8.0",
+    "typing_extensions==4.12.2",
+    "ultralytics>=8.2"
 ]
+requires-python = ">=3.12"
 
 [project.scripts]
 #pyvision = "pyvision.entrypoint:main"
 
 [tool.hatch.envs.default.scripts]
 pyvision = "hatch run python -m pyvision.main"
+debug = "python -m debugpy --listen 5678 ./src/pyvision/main.py"
 
 [tool.hatch.version]
 path = "src/pyvision/__init__.py"

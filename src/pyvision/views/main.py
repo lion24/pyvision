@@ -2,11 +2,14 @@
 
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, Callable, Tuple
+from typing import Any, Callable, Union
 
-from pyvision.utils.observer import ConcreteSubject, Subject
+from pyvision.utils.observer import ConcreteSubject
 from pyvision.views.root import Root
 from pyvision.views.video import VideoView
+
+CameraSelectionType = Union[tk.StringVar, str]
+CameraSelectionCallback = Callable[[CameraSelectionType], None]
 
 
 class View:
@@ -48,60 +51,45 @@ class MainView(tk.Frame):
         self.brightness_and_contrast_frame = ImageBrightnessAndContrastFrame(self)
         self.brightness_and_contrast_frame.pack()
 
-    def on_camera_select(self, *args: Any) -> None:
-        """Callback function called when a camera is selected from the dropdown menu.
+    # def notify_update(
+    #     self, subject: Subject, *args: Tuple[Any], **kwargs: dict[str, Any]
+    # ) -> None:
+    #     """Called every time an update from a subject is requested.
 
-        Args:
-            *args (Any): Additional arguments.
+    #     This call will have the effect of refreshing the image displayed.
 
-        """
-        if self.camera_menu is None:
-            return
+    #     Args:
+    #         subject (Subject): The subject that triggered the update.
+    #         *args (Tuple[Any]): Additional arguments.
+    #         **kwargs (dict[str, Any]): Additional keyword arguments.
 
-        idx = self.camera_menu.get_selected_camera()
-        if idx == -1:
-            print("No camera selected")
-            return
+    #     """
+    #     if isinstance(subject, CameraSelectionFrame):
+    #         print("Camera selected")
+    #         self.on_camera_select(*args)
+    #     elif isinstance(subject, ImageBrightnessAndContrastFrame):
+    #         print(
+    #             f"Brightness and contrast updated {self.brightness} : {self.contrast}"
+    #         )
+    #         self.brightness = self.brightness_and_contrast_frame.get_brightness()
+    #         self.contrast = self.brightness_and_contrast_frame.get_contrast()
 
-    def notify_update(
-        self, subject: Subject, *args: Tuple[Any], **kwargs: dict[str, Any]
-    ) -> None:
-        """Called every time an update from a subject is requested.
-
-        This call will have the effect of refreshing the image displayed.
-
-        Args:
-            subject (Subject): The subject that triggered the update.
-            *args (Tuple[Any]): Additional arguments.
-            **kwargs (dict[str, Any]): Additional keyword arguments.
-
-        """
-        if isinstance(subject, CameraSelectionFrame):
-            print("Camera selected")
-            self.on_camera_select(*args)
-        elif isinstance(subject, ImageBrightnessAndContrastFrame):
-            print(
-                f"Brightness and contrast updated {self.brightness} : {self.contrast}"
-            )
-            self.brightness = self.brightness_and_contrast_frame.get_brightness()
-            self.contrast = self.brightness_and_contrast_frame.get_contrast()
-
-            # frame = self.adjust_brightness_contrast(
-            #     frame,
-            #     self.brightness,
-            #     self.contrast,
-            # )
-            # processed_frame = self.processor.process(frame)
-            # processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
-            # cv2.putText(
-            #     processed_frame,
-            #     "{:.0f} frame/s".format(self.cap.info()["fps"]),
-            #     (self.root.width - 180, self.root.height - 40),
-            #     cv2.FONT_HERSHEY_TRIPLEX,
-            #     1.0,
-            #     (0, 255, 0),
-            #     1,
-            # )
+    # frame = self.adjust_brightness_contrast(
+    #     frame,
+    #     self.brightness,
+    #     self.contrast,
+    # )
+    # processed_frame = self.processor.process(frame)
+    # processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
+    # cv2.putText(
+    #     processed_frame,
+    #     "{:.0f} frame/s".format(self.cap.info()["fps"]),
+    #     (self.root.width - 180, self.root.height - 40),
+    #     cv2.FONT_HERSHEY_TRIPLEX,
+    #     1.0,
+    #     (0, 255, 0),
+    #     1,
+    # )
 
     # def adjust_brightness_contrast(
     #     self, frame: UMat, brightness: int = 255, contrast: int = 127
@@ -194,23 +182,27 @@ class CameraSelectionFrame(tk.Frame):
         super().__init__(master, **kwargs)
         self.camera_opt = tk.StringVar(self)
         self.camera_opt.set("Select camera")
-        self.menu = ttk.OptionMenu(self, self.camera_opt, "Select camera")
+        self.menu = ttk.OptionMenu(
+            self,
+            self.camera_opt,
+            "Select camera",
+            command=self.on_camera_select,
+        )
         self.menu.pack()
-        self.camera_opt.trace_add("write", self.on_camera_select)
+        # self.camera_opt.trace_add("write", self.on_camera_select)
         self.on_select_callback = None
 
-    def on_camera_select(self, *args: Any) -> None:
+    def on_camera_select(self, event: tk.StringVar):
         """Callback function called when a camera is selected from the dropdown menu.
 
         Args:
-            *args (Any): Additional arguments.
+            event (tk.StringVar): The selected camera.
 
         """
         if self.on_select_callback:
-            selected_camera = self.camera_opt.get()
-            self.on_select_callback(selected_camera)
+            self.on_select_callback(event)
 
-    def set_on_select_callback(self, callback: Callable[[str], None]) -> None:
+    def set_on_select_callback(self, callback: CameraSelectionCallback) -> None:
         """Set the callback function to be called when a camera is selected.
 
         Args:
@@ -218,19 +210,6 @@ class CameraSelectionFrame(tk.Frame):
 
         """
         self.on_select_callback = callback
-
-        # self.camera_opt.trace_add("write", parent.on_camera_select)
-        # if next(iter(self.cameras.keys()), "Select camera") != "Select camera":
-        #     self.camera_opt.set(next(iter(self.cameras.keys())))
-
-    def get_selected_camera(self) -> str:
-        """Get the selected camera index.
-
-        Returns:
-            int: The selected camera index.
-
-        """
-        return self.camera_opt.get()
 
 
 class ImageBrightnessAndContrastFrame(tk.Frame, ConcreteSubject):

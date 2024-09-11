@@ -7,5 +7,7 @@
       "charliermarsh.ruff",
       // Blockman
       "leodevbro.blockman",
+      // Jupyter support
+      "ms-toolsai.jupyter",
     ]
   }
