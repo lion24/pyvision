@@ -59,14 +59,15 @@ class VideoController(Observer):
         }
 
         # Load Yolo pretrained model
+        self.model_path = "yolo/yolov9t.pt"
         # Check if the model exists, if not download it
-        if not check_file_exists("yolo/yolov9t.pt"):
+        if not check_file_exists(self.model_path):
             download_to(
-                "yolo/yolov9t.pt",
+                self.model_path,
                 "https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov9t.pt",
             )
 
-        yolo_model = YOLO("yolo/yolov9t.pt", verbose=False)
+        yolo_model = YOLO(self.model_path, verbose=False)
         print(f"info: {yolo_model.info()}")
 
         # Add filters to the model

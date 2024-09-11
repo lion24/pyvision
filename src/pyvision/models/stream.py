@@ -21,7 +21,6 @@ class StreamModel(ConcreteSubject):
         self.width = self.stream.width
         self.height = self.stream.height
         self.fps = self.stream.fps
-        self.frame = cv2.UMat(self.height, self.width, cv2.CV_8UC3)
 
     def add_filter(self, filter_func: Callable[[Image], cv2.UMat]) -> None:
         """Add a filter function to the list of filters.
@@ -48,13 +47,3 @@ class StreamModel(ConcreteSubject):
     def release(self) -> None:
         """Release the video stream."""
         self.stream.release()
-
-    def update_frame(self, frame: cv2.UMat) -> None:
-        """Updates the current frame.
-
-        Args:
-            frame (cv2.UMat): The new frame to be set as the current frame.
-        """
-        ret, frame = self.stream.read_frame()
-        if ret:
-            self.frame = frame

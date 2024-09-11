@@ -3,7 +3,7 @@
 import pathlib
 
 import pkg_resources
-from setuptools import Extension, setup
+from setuptools import Extension, setup  # type: ignore
 
 setup_dir = pathlib.Path(__file__).parent.resolve()
 
