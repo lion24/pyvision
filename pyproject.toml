@@ -1,5 +1,10 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = [
+    "setuptools>=74",
+    "wheel",
+    "packaging>=24.1",
+    "tomli"
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -24,6 +29,11 @@ dependencies = [
     "ultralytics>=8.2"
 ]
 requires-python = ">=3.12"
+
+[project.optional-dependencies]
+dev = [
+    "hatch"
+]
 
 [project.scripts]
 #pyvision = "pyvision.entrypoint:main"
