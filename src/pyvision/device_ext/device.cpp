@@ -7,6 +7,7 @@
 #include <comutil.h>
 
 #include <iostream>
+#include <vector>
 
 #pragma comment(lib, "strmiids")
 
@@ -121,7 +122,7 @@ PyObject* DisplayDeviceInformation(IEnumMoniker* pEnum) {
 
     while (pEnum->Next(1, &pMoniker, nullptr) == S_OK) {
         IPropertyBag* pPropBag;
-        HRESULT hr = pMoniker->BindToStorage(0, 0, IID_PPV_ARGS(&pPropBag));
+        HRESULT hr = pMoniker->BindToStorage(nullptr, nullptr, IID_PPV_ARGS(&pPropBag));
         if (FAILED(hr)) {
             pMoniker->Release();
             continue;
@@ -159,7 +160,7 @@ PyObject* DisplayDeviceInformation(IEnumMoniker* pEnum) {
 }
 
 
-static PyObject* getDeviceList(PyObject* self, PyObject* args) {
+static PyObject* getDeviceList([[maybe_unused]] PyObject* self, [[maybe_unused]] PyObject* args) {
     PyObject* pyList = nullptr;
 
     HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -177,7 +178,7 @@ static PyObject* getDeviceList(PyObject* self, PyObject* args) {
     return pyList;
 }
 
-static PyMethodDef device_methods[] = {
+static std::vector<PyMethodDef> device_methods = {
     {"getDeviceList", getDeviceList, METH_VARARGS, "get device list"},
     {nullptr, nullptr, 0, nullptr} /* Sentinel */
 };
@@ -188,16 +189,16 @@ PyMODINIT_FUNC init_device(void)
     (void) Py_InitModule("device", device_methods);
 }
 #else /* PY_MAJOR_VERSION >= 3 */
-static struct PyModuleDef device_module_def = {
+static const struct PyModuleDef device_module_def = {
     PyModuleDef_HEAD_INIT,
     "device",
     "Internal \"device\" module",
     -1,
-    device_methods
+    device_methods.data()
 };
 
 PyMODINIT_FUNC PyInit_device(void)
 {
-    return PyModule_Create(&device_module_def);
+    return PyModule_Create(const_cast<PyModuleDef*>(&device_module_def));
 }
 #endif /* PY_MAJOR_VERSION >= 3 */
