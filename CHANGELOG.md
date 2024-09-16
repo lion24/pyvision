@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/lion24/pyvision/compare/v0.2.0...v0.2.1) (2024-09-16)
+
+
+### Bug Fixes
+
+* the build extension was failing ([f75f493](https://github.com/lion24/pyvision/commit/f75f49340bca7df2548572c2ed5821a2894ecd8f))
+
 ## [0.2.0](https://github.com/lion24/pyvision/compare/v0.1.0...v0.2.0) (2024-09-11)
 
 
