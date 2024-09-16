@@ -1,18 +1,23 @@
 """Setup script for the package."""
 
+import os
+
+os.environ["VSLANG"] = "1033"
+
 import pathlib
 
-import pkg_resources
+import tomli
+from packaging.requirements import Requirement
 from setuptools import Extension, setup  # type: ignore
 
 setup_dir = pathlib.Path(__file__).parent.resolve()
 
-requirements_path = setup_dir / "requirements.txt"
-with requirements_path.open() as requirements_txt:
-    install_requires = [
-        str(requirement)
-        for requirement in pkg_resources.parse_requirements(requirements_txt)
-    ]
+pyproject_toml = setup_dir / "pyproject.toml"
+with open(pyproject_toml, "rb") as f:
+    tomli_dict = tomli.load(f)
+    dependencies = tomli_dict["project"]["dependencies"]
+
+    install_requires = [str(Requirement(line.strip())) for line in dependencies]
 
 setup_args = dict(
     install_requires=install_requires,
@@ -20,6 +25,7 @@ setup_args = dict(
         Extension(
             "pyvision.device",
             sources=["./src/pyvision/device_ext/device.cpp"],
+            libraries=["Ole32", "OleAut32"],
         )
     ],
 )
