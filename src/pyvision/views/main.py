@@ -51,117 +51,6 @@ class MainView(tk.Frame):
         self.brightness_and_contrast_frame = ImageBrightnessAndContrastFrame(self)
         self.brightness_and_contrast_frame.pack()
 
-    # def notify_update(
-    #     self, subject: Subject, *args: Tuple[Any], **kwargs: dict[str, Any]
-    # ) -> None:
-    #     """Called every time an update from a subject is requested.
-
-    #     This call will have the effect of refreshing the image displayed.
-
-    #     Args:
-    #         subject (Subject): The subject that triggered the update.
-    #         *args (Tuple[Any]): Additional arguments.
-    #         **kwargs (dict[str, Any]): Additional keyword arguments.
-
-    #     """
-    #     if isinstance(subject, CameraSelectionFrame):
-    #         print("Camera selected")
-    #         self.on_camera_select(*args)
-    #     elif isinstance(subject, ImageBrightnessAndContrastFrame):
-    #         print(
-    #             f"Brightness and contrast updated {self.brightness} : {self.contrast}"
-    #         )
-    #         self.brightness = self.brightness_and_contrast_frame.get_brightness()
-    #         self.contrast = self.brightness_and_contrast_frame.get_contrast()
-
-    # frame = self.adjust_brightness_contrast(
-    #     frame,
-    #     self.brightness,
-    #     self.contrast,
-    # )
-    # processed_frame = self.processor.process(frame)
-    # processed_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
-    # cv2.putText(
-    #     processed_frame,
-    #     "{:.0f} frame/s".format(self.cap.info()["fps"]),
-    #     (self.root.width - 180, self.root.height - 40),
-    #     cv2.FONT_HERSHEY_TRIPLEX,
-    #     1.0,
-    #     (0, 255, 0),
-    #     1,
-    # )
-
-    # def adjust_brightness_contrast(
-    #     self, frame: UMat, brightness: int = 255, contrast: int = 127
-    # ) -> UMat:
-    #     """Adjusts the brightness and contrast of an input frame.
-
-    #     Args:
-    #         frame (MatLike): The input frame to adjust.
-    #         brightness (int, optional): The brightness value. Defaults to 255.
-    #         contrast (int, optional): The contrast value. Defaults to 127.
-
-    #     Returns:
-    #         MatLike: The adjusted frame.
-    #     """
-    #     brightness = int(
-    #         (brightness - 0) * (255 - (-255)) / (510 - 0) + (-255)
-    #     )  # Normalize brightness
-    #     contrast = int(
-    #         (contrast - 0) * (127 - (-127)) / (254 - 0) + (-127)
-    #     )  # Normalize contrast
-
-    #     if brightness != 0:
-    #         if brightness > 0:
-    #             shadow = brightness
-    #             max = 255
-    #         else:
-    #             shadow = 0
-    #             max = 255 + brightness
-
-    #         al_pha = (max - shadow) / 255
-    #         ga_mma = shadow
-
-    #         # The function addWeighted calculates
-    #         # the weighted sum of two arrays
-    #         cal = cv2.addWeighted(frame, al_pha, frame, 0, ga_mma)
-    #     else:
-    #         cal = frame
-
-    #     if contrast != 0:
-    #         Alpha = float(131 * (contrast + 127)) / (127 * (131 - contrast))
-    #         Gamma = 127 * (1 - Alpha)
-
-    #         # The function addWeighted calculates
-    #         # the weighted sum of two arrays
-    #         cal = cv2.addWeighted(cal, Alpha, cal, 0, Gamma)
-
-    #     return cal
-
-    # def on_brightness_change(self, event: Any) -> None:
-    #     """Callback function called when the brightness scale is changed.
-
-    #     Args:
-    #         event (tk.Event): The event object.
-
-    #     """
-    #     self.brightness = self.brightness_and_contrast_frame.get_brightness()
-    #     self.notify_update(self.brightness_and_contrast_frame)
-
-    # def on_contrast_change(self, event: Any) -> None:
-    #     """Callback function called when the brightness scale is changed.
-
-    #     Args:
-    #         event (tk.Event): The event object.
-
-    #     """
-    #     self.contrast = self.brightness_and_contrast_frame.get_contrast()
-    #     self.notify_update(self.brightness_and_contrast_frame)
-
-    # def start_mainloop(self) -> None:
-    #     """Start the main loop of the camera app."""
-    #     self.root.mainloop()
-
 
 class CameraSelectionFrame(tk.Frame):
     """A class representing the camera selection frame in the camera app.
@@ -189,7 +78,6 @@ class CameraSelectionFrame(tk.Frame):
             command=self.on_camera_select,
         )
         self.menu.pack()
-        # self.camera_opt.trace_add("write", self.on_camera_select)
         self.on_select_callback = None
 
     def on_camera_select(self, event: tk.StringVar):
@@ -251,9 +139,6 @@ class ImageBrightnessAndContrastFrame(tk.Frame, ConcreteSubject):
         self.contrast_scale = ttk.Scale(self, from_=0, to=2 * 127, orient=tk.HORIZONTAL)
         self.contrast_scale.set(127)  # type: ignore
         self.contrast_scale.grid(row=0, column=3, padx=10, pady=5, sticky="ew")
-
-        # self.brightness_scale.bind("<ButtonRelease-1>", parent.on_brightness_change)
-        # self.contrast_scale.bind("<ButtonRelease-1>", parent.on_contrast_change)
 
     def get_brightness(self) -> int:
         """Get the brightness value.

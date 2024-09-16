@@ -1,6 +1,7 @@
 """A module implementing the YOLO object detection algorithm."""
 
 import math
+import secrets
 from typing import List
 
 import cv2
@@ -23,10 +24,12 @@ class YoloObjectDetection(ImageProcessingDecorator):
         """
         super().__init__(wrapped)
         self.model = model
-        coco = open("coco/coco.names", "r")
-        self.classes = [cls.strip() for cls in coco.readlines()]
-        coco.close()
-        self.colors = np.random.uniform(0, 255, size=(len(self.classes), 3))
+        with open("coco/coco.names", "r") as coco:
+            self.classes = [cls.strip() for cls in coco.readlines()]
+
+        seed = secrets.randbits(128)
+        rng = np.random.default_rng(seed)
+        self.colors = rng.uniform(0, 255, size=(len(self.classes), 3))
 
     def process(self, _frame: Image) -> cv2.UMat:
         """Process the image with the YoloObjectDetection algorithm.
@@ -37,8 +40,6 @@ class YoloObjectDetection(ImageProcessingDecorator):
         Returns:
             cv2.UMat: The processed image.
         """
-        # return super().process(_frame)
-
         frame = super().process(_frame).get()
         results: List[Results] = self.model(frame, stream=True)
         for r in results:
