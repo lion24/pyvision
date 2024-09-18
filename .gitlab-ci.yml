@@ -23,19 +23,19 @@ sonarqube-check:
     - main
     - develop
 
-sonarqube-vulnerability-report:
-  stage: sonarqube-vulnerability-report
-  script:
-    - 'curl -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/issues/gitlab_sast_export?projectKey=pyvision&branch=${CI_COMMIT_BRANCH}&pullRequest=${CI_MERGE_REQUEST_IID}" -o gl-sast-sonar-report.json'
-  allow_failure: true
-  only:
-    - merge_requests
-    - master
-    - main
-    - develop
-  artifacts:
-    expire_in: 1 day
-    reports:
-      sast: gl-sast-sonar-report.json
-  dependencies:
-    - sonarqube-check
+# sonarqube-vulnerability-report:
+#   stage: sonarqube-vulnerability-report
+#   script:
+#     - 'wget --header="Authorization: Basic $(echo -n "${SONAR_TOKEN}:" | base64)" "${SONAR_HOST_URL}/api/issues/gitlab_sast_export?projectKey=pyvision&branch=${CI_COMMIT_BRANCH}&pullRequest=${CI_MERGE_REQUEST_IID}" -O gl-sast-sonar-report.json'
+#   allow_failure: true
+#   only:
+#     - merge_requests
+#     - master
+#     - main
+#     - develop
+#   artifacts:
+#     expire_in: 1 day
+#     reports:
+#       sast: gl-sast-sonar-report.json
+#   dependencies:
+#     - sonarqube-check
