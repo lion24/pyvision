@@ -1,7 +1,20 @@
 // EnumerateDevice.cpp : Ce fichier contient la fonction 'main'. L'exécution du programme commence et se termine à cet endroit.
 //
 
-#include "Python.h"
+// Save the _DEBUG flag state
+#ifdef _DEBUG
+#  pragma push_macro("_DEBUG")
+#  undef _DEBUG
+#endif
+
+// Include Python headers
+#include <Python.h>
+
+// Restore the _DEBUG flag state
+#ifdef _DEBUG
+#  pragma pop_macro("_DEBUG")
+#endif
+
 #include <Windows.h>
 #include <dshow.h>
 #include <comutil.h>
