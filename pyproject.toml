@@ -3,7 +3,8 @@ requires = [
     "setuptools>=74",
     "wheel",
     "packaging>=24.1",
-    "tomli"
+    "tomli",
+    "cmake>=3.29,<3.30",
 ]
 build-backend = "setuptools.build_meta"
 
