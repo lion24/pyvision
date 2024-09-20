@@ -10,6 +10,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pyvision"
 dynamic = ["version"]
+readme = "dynamic"
 description = "Pyvision: a framework to detect objects"
 dependencies = [
     "debugpy==1.8.5",
