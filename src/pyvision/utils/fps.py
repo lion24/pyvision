@@ -23,17 +23,17 @@ class FPS(ConcreteSubject):
         max_samples (int): Maximum number of samples to keep in the deque.
     """
 
-    def __init__(self, throttle_fps: int = 30, max_samples: int = 300):
+    def __init__(self, max_fps: int = 30, max_samples: int = 10):
         """Initialize the FPS object.
 
         Args:
-            throttle_fps (int): The desired FPS to throttle the update method (default: 30).
+            max_fps (int): The desired FPS to throttle the update method (default: 30).
             max_samples (int): Maximum number of samples to keep in the deque for smoothing (default: 10).
         """
         ConcreteSubject.__init__(self)
         self.prev_time = timeit.default_timer()
         self.delta_time = 0.0
-        self.throttle_fps = throttle_fps
+        self.max_fps = max_fps
         self.fps = 0
         self.delta_times: Deque[float] = deque(maxlen=max_samples)
 
@@ -42,6 +42,15 @@ class FPS(ConcreteSubject):
         current_time = timeit.default_timer()
         self.delta_time = current_time - self.prev_time
         self.prev_time = current_time
+
+        # Apply saturation: self.delta_time should be ]0, 1/max_fps]
+        min_delta_time = 1 / self.max_fps
+        max_delta_time = 1.0  # 1 second
+        self.delta_time = max(min_delta_time, min(self.delta_time, max_delta_time))
+
+        # assert that the average delta time is within the desired range
+        assert min_delta_time < self.delta_time <= max_delta_time
+
         self.delta_times.append(self.delta_time)
 
     def update(self, throttle: bool = False):
@@ -54,13 +63,10 @@ class FPS(ConcreteSubject):
             throttle (bool): Whether to throttle the FPS based on the desired FPS (default: False).
         """
         self.update_time()
-        if len(self.delta_times) > 0:
-            avg_delta_time = sum(self.delta_times) / len(self.delta_times)
-            if avg_delta_time > 0:
-                self.fps = 1.0 / avg_delta_time
+        self.fps = 1.0 / (sum(self.delta_times) / len(self.delta_times))
 
         if throttle:
-            sleep_time = (1.0 / self.throttle_fps) - self.delta_time
+            sleep_time = (1.0 / self.max_fps) - self.delta_time
             if sleep_time > 0.0:
                 time.sleep(sleep_time)
 
