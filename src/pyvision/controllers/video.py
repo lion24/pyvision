@@ -48,7 +48,7 @@ class VideoController(Observer):
         self.model.attach(self)
 
         # Instantiate the FPS counter
-        self.fps = FPS(throttle_fps=self.model.fps)
+        self.fps = FPS(max_fps=self.model.fps)
         self.fps.attach(self)
 
         # Actions hastable to call the corresponding function based on the subject
