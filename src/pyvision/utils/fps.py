@@ -63,8 +63,7 @@ class FPS(ConcreteSubject):
             throttle (bool): Whether to throttle the FPS based on the desired FPS (default: False).
         """
         self.update_time()
-        if len(self.delta_times) > 0:
-            self.fps = 1.0 / (sum(self.delta_times) / len(self.delta_times))
+        self.fps = 1.0 / (sum(self.delta_times) / len(self.delta_times))
 
         if throttle:
             sleep_time = (1.0 / self.max_fps) - self.delta_time
