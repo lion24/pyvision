@@ -41,7 +41,8 @@ dev = [
 #pyvision = "pyvision.entrypoint:main"
 
 [tool.hatch.envs.default.scripts]
-pyvision = "hatch run python -m pyvision.main"
+pyvision-dev = "hatch run python -m pyvision.main"
+pyvision = "hatch run python -O -OO -m pyvision.main" # run with optimizations
 debug = "python -m debugpy --listen 5678 ./src/pyvision/main.py"
 
 [tool.hatch.version]
