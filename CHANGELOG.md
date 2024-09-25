@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.2](https://github.com/lion24/pyvision/compare/v0.2.1...v0.2.2) (2024-09-25)
+
+
+### Bug Fixes
+
+* **fps:** apply staturation for the fps counter ([76ed7e5](https://github.com/lion24/pyvision/commit/76ed7e5b2fe28f629f9a75c88e71bef1fecf4584))
+
+
+### Documentation
+
+* clarify some installation points ([a3ea8ed](https://github.com/lion24/pyvision/commit/a3ea8ed7ed0a5333291d5ab76f95066179e68ef2))
+
 ## [0.2.1](https://github.com/lion24/pyvision/compare/v0.2.0...v0.2.1) (2024-09-16)
 
 
