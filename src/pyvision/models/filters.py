@@ -44,8 +44,8 @@ class IdentityFilter(ImageProcessingDecorator):
         """
         frame = super().process(_frame)
         array = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype="uint8")
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class EdgeDetectionKernelFilter(ImageProcessingDecorator):
@@ -110,8 +110,8 @@ class SharpenFilter(ImageProcessingDecorator):
         """
         frame = super().process(_frame)
         array = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]], dtype="uint8")
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class UnsharpMasking5By5KernelFilter(ImageProcessingDecorator):
@@ -145,8 +145,8 @@ class UnsharpMasking5By5KernelFilter(ImageProcessingDecorator):
             ],
             dtype="uint8",
         )
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class GaussianBlurKernelFilter(ImageProcessingDecorator):
@@ -171,8 +171,8 @@ class GaussianBlurKernelFilter(ImageProcessingDecorator):
         """
         frame = super().process(_frame)
         array = (1 / 16.0) * np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]], dtype="uint8")
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class GaussianKernelFilter(ImageProcessingDecorator):
@@ -206,8 +206,8 @@ class GaussianKernelFilter(ImageProcessingDecorator):
             ],
             dtype="uint8",
         )
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class GaussianSmoothingFilter(ImageProcessingDecorator):
@@ -241,8 +241,8 @@ class GaussianSmoothingFilter(ImageProcessingDecorator):
             ],
             dtype="uint8",
         )
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class LeftSobelKernelFilter(ImageProcessingDecorator):
@@ -267,8 +267,8 @@ class LeftSobelKernelFilter(ImageProcessingDecorator):
         """
         frame = super().process(_frame)
         array = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]], dtype="uint8")
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class TopSobelKernelFilter(ImageProcessingDecorator):
@@ -293,8 +293,8 @@ class TopSobelKernelFilter(ImageProcessingDecorator):
         """
         frame = super().process(_frame)
         array = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype="uint8")
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class VerticalSobelKernelFilter(ImageProcessingDecorator):
@@ -319,8 +319,8 @@ class VerticalSobelKernelFilter(ImageProcessingDecorator):
         """
         frame = super().process(_frame)
         array = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype="uint8")
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class HorizontalSobelKernelFilter(ImageProcessingDecorator):
@@ -345,8 +345,8 @@ class HorizontalSobelKernelFilter(ImageProcessingDecorator):
         """
         frame = super().process(_frame)
         array = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class LapaclacianKernelFilter(ImageProcessingDecorator):
@@ -371,8 +371,8 @@ class LapaclacianKernelFilter(ImageProcessingDecorator):
         """
         frame = super().process(_frame)
         array = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
-        inputKernel = cv2.UMat(array)  # type: ignore
-        return cv2.filter2D(frame, -1, inputKernel)
+        input_kernel = cv2.UMat(array)  # type: ignore
+        return cv2.filter2D(frame, -1, input_kernel)
 
 
 class LOGKernelFilter(ImageProcessingDecorator):
