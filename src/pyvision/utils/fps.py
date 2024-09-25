@@ -30,6 +30,14 @@ class FPS(ConcreteSubject):
             max_fps (int): The desired FPS to throttle the update method (default: 30).
             max_samples (int): Maximum number of samples to keep in the deque for smoothing (default: 10).
         """
+        if not isinstance(max_fps, int) or not isinstance(max_samples, int):  # type: ignore
+            raise TypeError(
+                f"max_fps and max_samples must be integers, got {type(max_fps)} and {type(max_samples)}"
+            )
+
+        if max_fps <= 0 or max_samples <= 0:
+            raise ValueError("max_fps and max_samples must be greater than 0")
+
         ConcreteSubject.__init__(self)
         self.prev_time = timeit.default_timer()
         self.delta_time = 0.0
