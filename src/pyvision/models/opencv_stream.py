@@ -18,7 +18,7 @@ class StreamSettings(TypedDict):
     desired_fps: int
 
 
-class READ_ERROR(Enum):
+class ReadError(Enum):
     """Enum representing the read error states."""
 
     NO_ERROR = 0
@@ -76,7 +76,7 @@ class OpenCVVideoStream(threading.Thread):
 
         return self.stream
 
-    def read_frame(self) -> Tuple[READ_ERROR, cv2.UMat]:
+    def read_frame(self) -> Tuple[ReadError, cv2.UMat]:
         """Read a frame from the video stream.
 
         Returns:
@@ -85,8 +85,8 @@ class OpenCVVideoStream(threading.Thread):
         """
         with self.read_lock:
             if not self.frame:
-                return READ_ERROR.NO_FRAME, self.frame
-            return READ_ERROR.NO_ERROR, self.frame
+                return ReadError.NO_FRAME, self.frame
+            return ReadError.NO_ERROR, self.frame
 
     def run(self) -> None:
         """Start the video stream."""
