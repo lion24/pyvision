@@ -13,7 +13,7 @@ from pyvision.models.camera import CameraModel
 from pyvision.models.filters import (
     NoOpFilter,
 )
-from pyvision.models.opencv_stream import READ_ERROR
+from pyvision.models.opencv_stream import ReadError
 from pyvision.models.stream import StreamModel
 from pyvision.models.yolo import YoloObjectDetection
 from pyvision.utils import check_file_exists, download_to
@@ -108,17 +108,17 @@ class VideoController(Observer):
         while not self.stop_event.is_set():
             ret, frame = self.model.stream.read_frame()
             match ret:
-                case READ_ERROR.NO_FRAME:
+                case ReadError.NO_FRAME:
                     continue  # Allow some frame to be dropped (usefull when switching cameras)
-                case READ_ERROR.NO_STREAM:
+                case ReadError.NO_STREAM:
                     print("no stream")
                     self.stop_thread()
                     return
-                case READ_ERROR.UNKNOWN_ERROR:
+                case ReadError.UNKNOWN_ERROR:
                     print("unknown error")
                     self.stop_thread()
                     return
-                case READ_ERROR.NO_ERROR:
+                case ReadError.NO_ERROR:
                     self.model.process(frame.get())
                     self.fps.update(throttle=True)
 
