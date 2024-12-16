@@ -22,7 +22,7 @@ dependencies = [
     "pylint==3.3.2",
     "pygame==2.6.1",
     "rethinkdb==2.4.10.post1",
-    "ruff==0.8.2",
+    "ruff==0.8.3",
     "six==1.17.0",
     "thinker==1.1.1",
     "torch>=1.8.0,<2.4.0; sys_platform == 'win32'",  # Windows CPU errors https://github.com/ultralytics/ultralytics/issues/15049
