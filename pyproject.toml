@@ -19,7 +19,7 @@ dependencies = [
     "numpy>=1.23.0,<2.0.0", # Needed to pin a specific version for ultralytics
     "opencv-python==4.10.0.84",
     "pre-commit==4.0.1",
-    "pylint==3.3.2",
+    "pylint==3.3.4",
     "pygame==2.6.1",
     "rethinkdb==2.4.10.post1",
     "ruff==0.11.0",
